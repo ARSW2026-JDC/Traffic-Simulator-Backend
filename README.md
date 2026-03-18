@@ -56,7 +56,7 @@
 
 ---
 
-## 📦 Instalación
+##  Instalación
 
 ### Prerrequisitos
 - Node.js >= 18.x
