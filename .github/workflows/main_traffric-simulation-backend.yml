@@ -51,6 +51,14 @@ jobs:
         with:
           name: node-app
       
+      - name: Install production dependencies
+        run: npm install --omit=dev
+
+      - name: Generate Prisma Client (runtime)
+        run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
       - name: Login to Azure
         uses: azure/login@v2
         with:

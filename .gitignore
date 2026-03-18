@@ -62,4 +62,3 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 /generated/prisma
 
 docker-publish.yml
-main_traffric-simulation-backend.yml
