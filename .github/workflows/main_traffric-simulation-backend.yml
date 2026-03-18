@@ -67,10 +67,16 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_FA57989AB4BD4253A74AB6054E84C25A }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_094DF4ED9AC14526A26B03E2CB073766 }}
 
+      - name: Install dependencies (deploy)
+        run: npm install
+
+      - name: Build app (deploy)
+        run: npm run build
+
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'traffric-simulation-backend'
           slot-name: 'Production'
-          package: dist
+          package: .
