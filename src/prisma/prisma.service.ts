@@ -4,12 +4,14 @@ import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
+import { envs } from 'src/config/envs';
+
 
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
   constructor() {
     // En Prisma 7, usamos un adapter específico para PostgreSQL
-    const connectionString = process.env.DATABASE_URL;
+    const connectionString = envs.databaseurl;
     const pool = new Pool({ connectionString });
     const adapter = new PrismaPg(pool);
 

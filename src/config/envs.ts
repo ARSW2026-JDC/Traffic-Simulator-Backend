@@ -1,38 +1,44 @@
 import 'dotenv/config';
 import * as joi from 'joi';
 import type { StringValue } from 'ms';
-import * as Redis from 'ioredis';
 
 interface EnvVars {
   PORT: number;
   DATABASE_URL: string;
   DIRECT_URL: string;
-  JWT_SECRET: string;
-  JWT_EXPIRATION: StringValue | number;
-  GOOGLE_CLIENT_ID: string;
-  GOOGLE_CLIENT_SECRET: string;
-  GOOGLE_CALLBACK_URL: string;
+  
+  FIREBASE_PROJECT_ID: string;
+  FIREBASE_CLIENT_EMAIL: string;
+  FIREBASE_PRIVATE_KEY: string;
+  VITE_FIREBASE_API_KEY: string;
+  VITE_FIREBASE_AUTH_DOMAIN: string;
+  VITE_FIREBASE_PROJECT_ID: string;
+  VITE_FIREBASE_STORAGE_BUCKET: string;
+  VITE_FIREBASE_MESSAGING_SENDER_ID: string;
+  VITE_FIREBASE_APP_ID: string;
+
   GATEWAY_URL: string;
-  SERVICEBUS_CONNECTION_STRING: string;
-  REDIS_HOST?: string;
-  REDIS_PORT?: number;
-  REDIS_PASSWORD?: string;
+  REDIS_URL: string;
 }
 const envsSchema = joi
   .object({
     PORT: joi.number().required(),
     DATABASE_URL: joi.string().required(),
     DIRECT_URL: joi.string().required(),
-    JWT_SECRET: joi.string().required(),
-    JWT_EXPIRATION: joi.alternatives().try(joi.string(), joi.number()).required(),
-    GOOGLE_CLIENT_ID: joi.string().required(),
-    GOOGLE_CLIENT_SECRET: joi.string().required(),
-    GOOGLE_CALLBACK_URL: joi.string().required(),
+
+    FIREBASE_PROJECT_ID: joi.string().required(),
+    FIREBASE_CLIENT_EMAIL: joi.string().required(),
+    FIREBASE_PRIVATE_KEY: joi.string().required(),
+    VITE_FIREBASE_API_KEY: joi.string().required(),
+    VITE_FIREBASE_AUTH_DOMAIN: joi.string().required(),
+    VITE_FIREBASE_PROJECT_ID: joi.string().required(),
+    VITE_FIREBASE_STORAGE_BUCKET: joi.string().required(),
+    VITE_FIREBASE_MESSAGING_SENDER_ID: joi.string().required(),
+    VITE_FIREBASE_APP_ID: joi.string().required(),
+
     GATEWAY_URL: joi.string().required(),
-    SERVICEBUS_CONNECTION_STRING: joi.string().required(),
-    REDIS_HOST: joi.string().optional(),
-    REDIS_PORT: joi.number().optional(),
-    REDIS_PASSWORD: joi.string().optional(),
+    REDIS_URL: joi.string().required(),
+
   })
   .unknown(true);
 
@@ -46,21 +52,17 @@ export const envs = {
   port: envVars.PORT,
   databaseurl: envVars.DATABASE_URL,
   databasedirect: envVars.DIRECT_URL,
-  jwtSecret: envVars.JWT_SECRET,
-  jwtexpiration: envVars.JWT_EXPIRATION,
-  googleClientId: envVars.GOOGLE_CLIENT_ID,
-  googleClientSecret: envVars.GOOGLE_CLIENT_SECRET,
-  googleCallbackUrl: envVars.GOOGLE_CALLBACK_URL,
-  gatewayUrl: envVars.GATEWAY_URL.startsWith('http') ? envVars.GATEWAY_URL : `https://${envVars.GATEWAY_URL}`,
-  servicebusconnectionstring: envVars.SERVICEBUS_CONNECTION_STRING,
-  redisHost: envVars.REDIS_HOST,
-  redisPort: envVars.REDIS_PORT,
-  redisPassword: envVars.REDIS_PASSWORD,
-};
 
-const redis = new Redis({
-  host: process.env.REDIS_HOST,
-  port: Number(process.env.REDIS_PORT),
-  password: process.env.REDIS_PASSWORD,
-  tls: process.env.REDIS_TLS === 'true' ? {} : undefined, // Azure requiere TLS
-});
+  firebaseProjectId: envVars.FIREBASE_PROJECT_ID,
+  firebaseClientEmail: envVars.FIREBASE_CLIENT_EMAIL,
+  firebasePrivateKey: envVars.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+  firebaseApiKey: envVars.VITE_FIREBASE_API_KEY,
+  firebaseAuthDomain: envVars.VITE_FIREBASE_AUTH_DOMAIN,
+  firebaseProjectIdFrontend: envVars.VITE_FIREBASE_PROJECT_ID,
+  firebaseStorageBucket: envVars.VITE_FIREBASE_STORAGE_BUCKET,
+  firebaseMessagingSenderId: envVars.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  firebaseAppId: envVars.VITE_FIREBASE_APP_ID,
+
+  gatewayUrl: envVars.GATEWAY_URL.startsWith('http') ? envVars.GATEWAY_URL : `https://${envVars.GATEWAY_URL}`,
+  redisUrl: envVars.REDIS_URL,
+};
