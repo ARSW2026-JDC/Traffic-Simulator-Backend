@@ -28,6 +28,8 @@ jobs:
 
       - name: Generate Prisma Client
         run: npx prisma generate
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Build and test
         run: |
@@ -67,4 +69,3 @@ jobs:
           app-name: 'traffric-simulation-backend'
           slot-name: 'Production'
           package: .
-          

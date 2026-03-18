@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import * as joi from 'joi';
 import type { StringValue } from 'ms';
+import * as Redis from 'ioredis';
 
 interface EnvVars {
   PORT: number;
@@ -56,3 +57,10 @@ export const envs = {
   redisPort: envVars.REDIS_PORT,
   redisPassword: envVars.REDIS_PASSWORD,
 };
+
+const redis = new Redis({
+  host: process.env.REDIS_HOST,
+  port: Number(process.env.REDIS_PORT),
+  password: process.env.REDIS_PASSWORD,
+  tls: process.env.REDIS_TLS === 'true' ? {} : undefined, // Azure requiere TLS
+});
