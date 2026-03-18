@@ -9,8 +9,12 @@ COPY package*.json ./
 # Copiar carpeta Prisma ANTES de instalar dependencias (postinstall necesita schema.prisma)
 COPY prisma ./prisma
 
+
 # Instalar TODAS las dependencias (incluidas dev)
 RUN npm ci
+
+# Generar cliente Prisma
+RUN npx prisma generate
 
 # Copiar el resto del código
 COPY . .
