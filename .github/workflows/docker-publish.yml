@@ -44,7 +44,3 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
-
-      # Set up env
-      - name: Set up env
-        run: echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env

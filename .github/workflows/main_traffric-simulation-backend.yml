@@ -26,9 +26,6 @@ jobs:
       - name: npm install
         run: npm install
 
-      - name: Set up env
-        run: echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
-
       - name: Generate Prisma Client
         run: npx prisma generate
         env:
