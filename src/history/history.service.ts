@@ -1,33 +1,20 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { PrismaService } from '../prisma/prisma.service';
-import { RedisService } from '../redis/redis.service';
+// import { RedisService } from '../redis/redis.service';
 
 @Injectable()
-export class HistoryService implements OnModuleInit {
+
+export class HistoryService {
   private wsServer: Server | null = null;
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly redis: RedisService,
+    // private readonly redis: RedisService,
   ) {}
 
   setWsServer(server: Server) {
     this.wsServer = server;
-  }
-
-  async onModuleInit() {
-    await this.redis.subscriber.subscribe('simulation:changes');
-    this.redis.subscriber.on('message', async (channel, raw) => {
-      if (channel !== 'simulation:changes') return;
-      try {
-        const change = JSON.parse(raw);
-        const entry = await this.saveChange(change);
-        this.wsServer?.emit('history:new', entry);
-      } catch (err) {
-        console.error('[history] failed to persist change:', err);
-      }
-    });
   }
 
   async saveChange(data: {
