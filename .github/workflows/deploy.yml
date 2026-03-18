@@ -48,8 +48,8 @@ jobs:
 
         if [ -d "$REPO_DIR/.git" ]; then
           cd "$REPO_DIR"
-          git pull origin "$BRANCH"
-        else
+          nvm install 20
+          nvm use 20
           git clone "$REPO_URL" "$REPO_DIR"
           cd "$REPO_DIR"
         fi
