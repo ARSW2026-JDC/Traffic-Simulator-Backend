@@ -24,7 +24,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/ARSW2026-JDC/traffic-simulator-gateway
+            ghcr.io/ARSW2026-JDC/Traffic-Simulator-Backend
           tags: |
             type=sha
             type=raw,value=${{ github.ref_name }}
