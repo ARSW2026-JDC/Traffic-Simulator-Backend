@@ -7,6 +7,6 @@ import { ChatModule } from './chat/chat.module';
 import { HistoryModule } from './history/history.module';
 
 @Module({
-  imports: [PrismaModule, RedisModule, AuthModule, UsersModule, ChatModule, HistoryModule],
+  imports: [PrismaModule, AuthModule, UsersModule, ChatModule, HistoryModule],
 })
 export class AppModule {}
