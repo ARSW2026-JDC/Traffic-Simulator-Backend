@@ -19,7 +19,11 @@ export class AuthGuard implements CanActivate {
     const email: string = req.headers['x-user-email'] || '';
 
     if (uid) {
-      req.user = await this.resolveUser(uid, email);
+      const user = await this.resolveUser(uid, email);
+      if (user.estatus === 'BLOCKED') {
+        throw new UnauthorizedException('User is blocked');
+      }
+      req.user = user;
       return true;
     }
 
@@ -31,7 +35,11 @@ export class AuthGuard implements CanActivate {
 
     try {
       const decoded = await admin.auth(firebaseApp).verifyIdToken(auth.split(' ')[1]);
-      req.user = await this.resolveUser(decoded.uid, decoded.email || '');
+      const user = await this.resolveUser(decoded.uid, decoded.email || '');
+      if (user.estatus === 'BLOCKED') {
+        throw new UnauthorizedException('User is blocked');
+      }
+      req.user = user;
       return true;
     } catch {
       throw new UnauthorizedException('Invalid token');

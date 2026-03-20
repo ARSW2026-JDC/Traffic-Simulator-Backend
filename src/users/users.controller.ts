@@ -6,8 +6,9 @@ import {
   Body,
   UseGuards,
   Request,
+  Delete,
 } from '@nestjs/common';
-import { Role } from '@prisma/client';
+import { Estatus, Role } from '@prisma/client';
 import { UsersService } from './users.service';
 import { AuthGuard } from '../auth/auth.guard';
 import { RolesGuard } from './roles.guard';
@@ -18,20 +19,9 @@ import { Roles } from './roles.decorator';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get('me')
-  getMe(@Request() req: any) {
-    const u = req.user;
-    return { id: u.id, email: u.email, name: u.name, role: u.role, createdAt: u.createdAt };
-  }
-
-  @Patch('me')
-  updateMe(@Request() req: any, @Body() body: { name?: string }) {
-    return this.usersService.updateMe(req.user.id, body);
-  }
-
   @Get()
   @UseGuards(RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.USER)
   findAll() {
     return this.usersService.findAll();
   }
@@ -41,5 +31,24 @@ export class UsersController {
   @Roles(Role.ADMIN)
   updateRole(@Param('id') id: string, @Body() body: { role: Role }) {
     return this.usersService.updateRole(id, body.role);
+  }
+
+  @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  deleteUser(@Param('id') id: string) {
+    return this.usersService.deleteUser(id);
+  }
+
+  @Get('allActive')
+  findAllActive() {
+    return this.usersService.findAllActive();
+  }
+
+  @Patch(':id/banChat')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  changeEstatus(@Param('id') id: string, @Body() body: { estatus: Estatus }) {
+    return this.usersService.changeEstatus(id, body.estatus);
   }
 }
