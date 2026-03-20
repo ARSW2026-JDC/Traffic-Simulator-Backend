@@ -45,7 +45,7 @@ export class UsersController {
     return this.usersService.findAllActive();
   }
 
-  @Patch(':id/banChat')
+  @Patch(':id/estatus')
   @UseGuards(RolesGuard)
   @Roles(Role.ADMIN)
   changeEstatus(@Param('id') id: string, @Body() body: { estatus: Estatus }) {

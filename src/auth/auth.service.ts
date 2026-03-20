@@ -20,13 +20,24 @@ export class AuthService {
 
     let user = await this.prisma.user.findUnique({ where: { firebaseUid: decoded.uid } });
     if (!user) {
-      user = await this.prisma.user.create({
-        data: {
-          firebaseUid: decoded.uid,
-          email: decoded.email || `${decoded.uid}@anon.com`,
-          name: decoded.name || null,
-        },
-      });
+      try {
+        // Si no tiene email ni nombre, lo consideramos guest
+        const isGuest = !decoded.email && !decoded.name;
+        user = await this.prisma.user.create({
+          data: {
+            firebaseUid: decoded.uid,
+            email: decoded.email || `${decoded.uid}@anon.com`,
+            name: decoded.name || null,
+            role: isGuest ? 'GUEST' : undefined,
+          },
+        });
+      } catch (err) {
+        if (err.code === 'P2002') {
+          user = await this.prisma.user.findUnique({ where: { firebaseUid: decoded.uid } });
+        } else {
+          throw err;
+        }
+      }
     }
 
     if (user.estatus === 'BLOCKED') {

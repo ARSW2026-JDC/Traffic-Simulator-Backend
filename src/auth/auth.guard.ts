@@ -49,9 +49,18 @@ export class AuthGuard implements CanActivate {
   private async resolveUser(uid: string, email: string) {
     let user = await this.prisma.user.findUnique({ where: { firebaseUid: uid } });
     if (!user) {
-      user = await this.prisma.user.create({
-        data: { firebaseUid: uid, email: email || `${uid}@anon.com` },
-      });
+      try {
+        user = await this.prisma.user.create({
+          data: { firebaseUid: uid, email: email || `${uid}@anon.com` },
+        });
+      } catch (err) {
+        // Si ocurre error de clave duplicada, buscar el usuario de nuevo
+        if (err.code === 'P2002') {
+          user = await this.prisma.user.findUnique({ where: { firebaseUid: uid } });
+        } else {
+          throw err;
+        }
+      }
     }
     return user;
   }
