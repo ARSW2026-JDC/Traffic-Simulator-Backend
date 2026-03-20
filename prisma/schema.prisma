@@ -17,6 +17,14 @@ model User {
   updatedAt   DateTime      @updatedAt
   messages    ChatMessage[]
   changeLogs  ChangeLog[]
+  estatus     Estatus       @default(ACTIVE)
+}
+
+enum Estatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+  BLOCKED
 }
 
 enum Role {

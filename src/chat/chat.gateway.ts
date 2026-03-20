@@ -52,6 +52,19 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         });
       }
 
+      // Si el usuario está baneado o bloqueado, no permitir conexión
+      if (user.estatus === 'BANNED' || user.estatus === 'BLOCKED') {
+        client.disconnect();
+        return;
+      }
+      // Cambiar estatus a ACTIVE al conectar solo si no está bloqueado
+      if (user.estatus !== 'ACTIVE') {
+        await this.prisma.user.update({
+          where: { id: user.id },
+          data: { estatus: 'ACTIVE' },
+        });
+      }
+
       client.data.userId = user.id;
       client.data.userName = user.name || user.email;
       client.data.role = user.role;
@@ -60,7 +73,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  handleDisconnect(_client: Socket) {}
+  async handleDisconnect(client: Socket) {
+    // Cambiar estatus a INACTIVE al desconectar solo si no está bloqueado
+    if (client.data?.userId) {
+      try {
+        const user = await this.prisma.user.findUnique({ where: { id: client.data.userId } });
+        if (user && user.estatus !== 'BLOCKED') {
+          await this.prisma.user.update({
+            where: { id: client.data.userId },
+            data: { estatus: 'INACTIVE' },
+          });
+        }
+      } catch (e) {
+        // Ignorar errores de desconexión
+      }
+    }
+  }
 
   @SubscribeMessage('message:send')
   async handleMessage(
