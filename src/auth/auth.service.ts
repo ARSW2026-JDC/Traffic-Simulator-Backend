@@ -29,6 +29,10 @@ export class AuthService {
       });
     }
 
+    if (user.estatus === 'BLOCKED') {
+      throw new UnauthorizedException('User is blocked');
+    }
+
     return {
       id: user.id,
       email: user.email,
