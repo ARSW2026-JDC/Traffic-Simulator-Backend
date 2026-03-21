@@ -43,13 +43,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const decoded = await admin.auth(firebaseApp).verifyIdToken(token);
       let user = await this.prisma.user.findUnique({ where: { firebaseUid: decoded.uid } });
       if (!user) {
-        user = await this.prisma.user.create({
-          data: {
-            firebaseUid: decoded.uid,
-            email: decoded.email || `${decoded.uid}@anon.com`,
-            name: decoded.name || null,
-          },
-        });
+        client.disconnect();
+        return;
       }
 
       // Si el usuario está baneado o bloqueado, no permitir conexión

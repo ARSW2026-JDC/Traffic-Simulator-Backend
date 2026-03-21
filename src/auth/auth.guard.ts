@@ -12,6 +12,8 @@ import { PrismaService } from '../prisma/prisma.service';
 export class AuthGuard implements CanActivate {
   constructor(private readonly prisma: PrismaService) {}
 
+
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
 
@@ -19,7 +21,10 @@ export class AuthGuard implements CanActivate {
     const email: string = req.headers['x-user-email'] || '';
 
     if (uid) {
-      const user = await this.resolveUser(uid, email);
+      const user = await this.prisma.user.findUnique({ where: { firebaseUid: uid } });
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
       if (user.estatus === 'BLOCKED') {
         throw new UnauthorizedException('User is blocked');
       }
@@ -35,7 +40,10 @@ export class AuthGuard implements CanActivate {
 
     try {
       const decoded = await admin.auth(firebaseApp).verifyIdToken(auth.split(' ')[1]);
-      const user = await this.resolveUser(decoded.uid, decoded.email || '');
+      const user = await this.prisma.user.findUnique({ where: { firebaseUid: decoded.uid } });
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
       if (user.estatus === 'BLOCKED') {
         throw new UnauthorizedException('User is blocked');
       }
@@ -46,22 +54,4 @@ export class AuthGuard implements CanActivate {
     }
   }
 
-  private async resolveUser(uid: string, email: string) {
-    let user = await this.prisma.user.findUnique({ where: { firebaseUid: uid } });
-    if (!user) {
-      try {
-        user = await this.prisma.user.create({
-          data: { firebaseUid: uid, email: email || `${uid}@anon.com` },
-        });
-      } catch (err) {
-        // Si ocurre error de clave duplicada, buscar el usuario de nuevo
-        if (err.code === 'P2002') {
-          user = await this.prisma.user.findUnique({ where: { firebaseUid: uid } });
-        } else {
-          throw err;
-        }
-      }
-    }
-    return user;
-  }
 }
