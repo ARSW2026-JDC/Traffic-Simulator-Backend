@@ -19,24 +19,38 @@ export class AuthService {
     }
 
     let user = await this.prisma.user.findUnique({ where: { firebaseUid: decoded.uid } });
+    console.log('Decoded token:', decoded);
     if (!user) {
+      // Guest si es anónimo o el email termina en @anon.com
+      const isGuest = (decoded.provider_id === 'anonymous')
+      console.log('Is guest:', isGuest);
+      // Contar cuántos usuarios guest hay actualmente
+      const usersGuestCount = await this.prisma.user.count({ where: { role: 'GUEST' } });
+      // Limitar a 50 usuarios guest simultáneos
+      if (isGuest && usersGuestCount >= 50) {
+        throw new UnauthorizedException('Guest user limit reached');
+      }
       try {
-        // Si no tiene email ni nombre, lo consideramos guest
-        const isGuest = !decoded.email && !decoded.name;
-        user = await this.prisma.user.create({
-          data: {
-            firebaseUid: decoded.uid,
-            email: decoded.email || `${decoded.uid}@anon.com`,
-            name: decoded.name || null,
-            role: isGuest ? 'GUEST' : undefined,
-          },
-        });
-      } catch (err) {
-        if (err.code === 'P2002') {
-          user = await this.prisma.user.findUnique({ where: { firebaseUid: decoded.uid } });
+        if (isGuest) {
+          user = await this.prisma.user.create({
+            data: {
+              firebaseUid: decoded.uid,
+              email: decoded.email || `${decoded.uid}@anon.com`,
+              name: decoded.name || `Guest${usersGuestCount + 1}`,
+              role: 'GUEST',
+            },
+          });
         } else {
-          throw err;
+          user = await this.prisma.user.create({
+            data: {
+              firebaseUid: decoded.uid,
+              email: decoded.email ? decoded.email : `${decoded.uid}@anon.com`,
+              name: decoded.name || null,
+            },
+          });
         }
+      } catch (err) {
+        console.error('Error creating user:', err);
       }
     }
 
