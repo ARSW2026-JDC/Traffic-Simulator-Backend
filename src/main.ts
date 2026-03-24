@@ -4,10 +4,14 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { envs } from './config/envs';
+const responseTime = require('response-time');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({ origin: '*', methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'] });
+
+  // Middleware para medir el tiempo de respuesta
+  app.use(responseTime());
 
   // Swagger setup
   const config = new DocumentBuilder()

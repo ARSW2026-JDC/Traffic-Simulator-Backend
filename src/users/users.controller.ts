@@ -41,6 +41,8 @@ export class UsersController {
   }
 
   @Get('allActive')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN, Role.USER)
   findAllActive() {
     return this.usersService.findAllActive();
   }
