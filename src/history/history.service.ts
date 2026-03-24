@@ -1,7 +1,8 @@
+
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { PrismaService } from '../prisma/prisma.service';
-// import { RedisService } from '../redis/redis.service';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 
@@ -10,7 +11,7 @@ export class HistoryService {
 
   constructor(
     private readonly prisma: PrismaService,
-    // private readonly redis: RedisService,
+    private readonly redis: RedisService,
   ) {}
 
   setWsServer(server: Server) {
@@ -52,7 +53,6 @@ export class HistoryService {
       orderBy: { timestamp: 'desc' },
       include: { user: { select: { name: true, email: true } } },
     });
-
     return entries.map((e) => ({
       id: e.id,
       userId: e.userId,

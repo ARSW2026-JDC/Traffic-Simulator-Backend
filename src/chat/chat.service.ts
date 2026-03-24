@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class ChatService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
+  ) {}
 
   async getMessages(limit = 50, cursor?: string) {
     const messages = await this.prisma.chatMessage.findMany({
@@ -12,7 +16,6 @@ export class ChatService {
       orderBy: { createdAt: 'desc' },
       include: { user: { select: { name: true, email: true } } },
     });
-
     return messages.reverse().map((m) => ({
       id: m.id,
       userId: m.userId,
