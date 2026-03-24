@@ -19,11 +19,9 @@ export class AuthService {
     }
 
     let user = await this.prisma.user.findUnique({ where: { firebaseUid: decoded.uid } });
-    console.log('Decoded token:', decoded);
     if (!user) {
       // Guest si es anónimo o el email termina en @anon.com
       const isGuest = (decoded.provider_id === 'anonymous')
-      console.log('Is guest:', isGuest);
       // Contar cuántos usuarios guest hay actualmente
       const usersGuestCount = await this.prisma.user.count({ where: { role: 'GUEST' } });
       // Limitar a 50 usuarios guest simultáneos
