@@ -5,7 +5,7 @@ import { Roles } from 'src/users/roles.decorator';
 import { RolesGuard } from 'src/users/roles.guard';
 import { Role } from '@prisma/client';
 
-@Controller('api/chat')
+@Controller('chat')
 @UseGuards(AuthGuard)
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
