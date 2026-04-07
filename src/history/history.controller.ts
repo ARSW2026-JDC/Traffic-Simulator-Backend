@@ -2,7 +2,7 @@ import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { HistoryService } from './history.service';
 import { AuthGuard } from '../auth/auth.guard';
 
-@Controller('api/history')
+@Controller('history')
 @UseGuards(AuthGuard)
 export class HistoryController {
   constructor(private readonly historyService: HistoryService) {}
