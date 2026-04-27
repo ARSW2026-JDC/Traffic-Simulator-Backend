@@ -96,6 +96,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     if (!client.data.userId || !data?.content?.trim()) return;
 
+    const user = await this.prisma.user.findUnique({
+      where: { id: client.data.userId },
+      select: { role: true },
+    });
+
+    if (user?.role === 'GUEST') {
+      client.emit('error', { message: 'Los usuarios invitados no pueden escribir en el chat' });
+      return;
+    }
+
     const msg = await this.chatService.saveMessage(
       client.data.userId,
       data.content.trim(),
