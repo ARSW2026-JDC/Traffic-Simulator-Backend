@@ -47,12 +47,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         return;
       }
 
-      // Si el usuario está baneado o bloqueado, no permitir conexión
-      if (user.estatus === 'BANNED' || user.estatus === 'BLOCKED') {
+      // Solo BLOCKED impide conexión
+      if (user.estatus === 'BLOCKED') {
         client.disconnect();
         return;
       }
-      // Cambiar estatus a ACTIVE al conectar solo si no está bloqueado
+      // Cambiar estatus a ACTIVE al conectar
       if (user.estatus !== 'ACTIVE') {
         await this.prisma.user.update({
           where: { id: user.id },
@@ -91,6 +91,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody() data: { content: string; clientId?: string },
   ) {
     if (!client.data.userId || !data?.content?.trim()) return;
+
     const msg = await this.chatService.saveMessage(client.data.userId, data.content.trim());
     this.server.emit('message:new', { ...msg, clientId: data.clientId });
   }

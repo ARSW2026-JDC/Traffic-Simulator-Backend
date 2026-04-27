@@ -8,23 +8,23 @@ datasource db {
 }
 
 model User {
-  id          String        @id @default(cuid())
-  firebaseUid String        @unique
-  email       String        @unique
-  name        String?
-  avatarUrl   String?
-  role        Role          @default(USER)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  messages    ChatMessage[]
-  changeLogs  ChangeLog[]
-  estatus     Estatus       @default(ACTIVE)
+  id           String        @id @default(cuid())
+  firebaseUid  String        @unique
+  email        String        @unique
+  name         String?
+  avatarUrl    String?
+  role         Role          @default(USER)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  lastActiveAt DateTime?
+  messages     ChatMessage[]
+  changeLogs   ChangeLog[]
+  estatus      Estatus       @default(ACTIVE)
 }
 
 enum Estatus {
   ACTIVE
   INACTIVE
-  BANNED
   BLOCKED
 }
 
