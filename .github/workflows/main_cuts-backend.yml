@@ -74,4 +74,4 @@ jobs:
           app-name: 'cuts-backend'
           slot-name: 'Production'
           package: .
-          
+          startup-command: 'npm install --omit=dev && npx prisma generate && node dist/src/main.js'
