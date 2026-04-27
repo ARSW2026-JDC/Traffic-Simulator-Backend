@@ -33,7 +33,7 @@ export class AuditConsumerService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     if (!this.connectionString) {
-      this.logger.warn('Azure Service Bus not configured (AZURE_SERVICE_BUS_CONNECTION_STRING missing). History consumer disabled.');
+      this.logger.warn('Azure Service Bus not configured. History consumer disabled.');
       return;
     }
 
@@ -42,11 +42,11 @@ export class AuditConsumerService implements OnModuleInit, OnModuleDestroy {
       this.receiver = this.client.createReceiver(this.topicName, this.subscriptionName);
       this.receiver.subscribe({
         processMessage: async (message) => this.handleMessage(message),
-        processError: async (args) => this.logger.warn(`Service Bus error: ${args.error.message}`),
+        processError: async (args) => this.logger.warn({ msg: 'Service Bus error', error: args.error.message }),
       });
-      this.logger.log(`AuditConsumer initialized: topic=${this.topicName} subscription=${this.subscriptionName}`);
+      this.logger.log({ msg: 'AuditConsumer initialized', topic: this.topicName, subscription: this.subscriptionName });
     } catch (err) {
-      this.logger.error(`Failed to initialize Service Bus consumer: ${err.message}`);
+      this.logger.error({ msg: 'Failed to initialize Service Bus consumer', error: err.message });
       this.client = null;
       this.receiver = null;
     }
@@ -58,23 +58,31 @@ export class AuditConsumerService implements OnModuleInit, OnModuleDestroy {
   }
 
   private async handleMessage(message: ServiceBusReceivedMessage) {
+    const correlationId = message.messageId;
     const event = this.parseEvent(message);
-    if (!event) return;
+    if (!event) {
+      this.logger.warn({ msg: 'Failed to parse event', correlationId });
+      return;
+    }
 
     if (!event.actor?.uid || !event.actor?.name) {
-      this.logger.warn(`Audit event missing actor info: ${event.eventId}`);
+      this.logger.warn({ msg: 'Audit event missing actor', eventId: event.eventId, correlationId });
       return;
     }
 
     await this.ensureUser(event);
     const change = this.mapAuditEvent(event);
-    if (!change) return;
+    if (!change) {
+      this.logger.warn({ msg: 'Failed to map audit event', eventId: event.eventId, commandType: event.commandType });
+      return;
+    }
 
     try {
       const entry = await this.historyService.saveChange(change);
       this.historyService.emitHistory(entry, event.simId);
+      this.logger.log({ msg: 'Audit event saved', eventId: event.eventId, simId: event.simId });
     } catch (err) {
-      this.logger.warn(`Failed to persist audit event ${event.eventId}: ${err.message}`);
+      this.logger.error({ msg: 'Failed to persist audit event', eventId: event.eventId, error: err.message });
     }
   }
 
