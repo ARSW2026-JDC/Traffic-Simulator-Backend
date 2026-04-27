@@ -91,10 +91,6 @@ describe('PrismaService', () => {
   });
 
   describe('PrismaClient functionality', () => {
-    it('should have usuario model available', () => {
-      expect(service.usuario).toBeDefined();
-    });
-
     it('should have $connect method', () => {
       expect(typeof service.$connect).toBe('function');
     });

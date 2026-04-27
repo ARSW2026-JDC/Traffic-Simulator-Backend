@@ -5,8 +5,7 @@ import type { StringValue } from 'ms';
 interface EnvVars {
   PORT: number;
   DATABASE_URL: string;
-  DIRECT_URL: string;
-  
+
   FIREBASE_PROJECT_ID: string;
   FIREBASE_CLIENT_EMAIL: string;
   FIREBASE_PRIVATE_KEY: string;
@@ -24,10 +23,9 @@ interface EnvVars {
   AZURE_SERVICE_BUS_SUBSCRIPTION: string;
 }
 const envsSchema = joi
-  .object({
+.object({
     PORT: joi.number().required(),
     DATABASE_URL: joi.string().required(),
-    DIRECT_URL: joi.string().required(),
     FIREBASE_PROJECT_ID: joi.string().required(),
     FIREBASE_CLIENT_EMAIL: joi.string().required(),
     FIREBASE_PRIVATE_KEY: joi.string().required(),
@@ -54,7 +52,6 @@ const envVars = result.value as EnvVars;
 export const envs = {
   port: envVars.PORT,
   databaseurl: envVars.DATABASE_URL,
-  databasedirect: envVars.DIRECT_URL,
   firebaseProjectId: envVars.FIREBASE_PROJECT_ID,
   firebaseClientEmail: envVars.FIREBASE_CLIENT_EMAIL,
   firebasePrivateKey: envVars.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
@@ -64,7 +61,6 @@ export const envs = {
   firebaseStorageBucket: envVars.VITE_FIREBASE_STORAGE_BUCKET,
   firebaseMessagingSenderId: envVars.VITE_FIREBASE_MESSAGING_SENDER_ID,
   firebaseAppId: envVars.VITE_FIREBASE_APP_ID,
-  gatewayUrl: envVars.GATEWAY_URL.startsWith('http') ? envVars.GATEWAY_URL : `https://${envVars.GATEWAY_URL}`,
   redisUrl: envVars.REDIS_URL,
   azureServiceBusConnectionString: envVars.AZURE_SERVICE_BUS_CONNECTION_STRING,
   azureServiceBusTopic: envVars.AZURE_SERVICE_BUS_TOPIC,

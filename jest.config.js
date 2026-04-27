@@ -10,5 +10,12 @@ module.exports = {
   coverageReporters: ['text', 'json', 'html'],
   testEnvironment: 'node',
   preset: 'ts-jest',
-  testMatch: null,
+  moduleNameMapper: {
+    '^src/(.*)$': '<rootDir>/$1',
+  },
+  globals: {
+    'ts-jest': {
+      isolatedModules: true,
+    },
+  },
 };
