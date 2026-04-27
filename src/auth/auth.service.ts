@@ -12,13 +12,11 @@ export class AuthService {
   constructor(private readonly prisma: PrismaService) {}
 
   async verifyAndGetProfile(token: string, correlationId?: string) {
-    this.logger.log({ msg: 'verifyAndGetProfile started', correlationId });
     const firebaseApp = getFirebaseAdmin();
     if (!firebaseApp) {
       this.logger.error({ msg: 'Firebase not configured', correlationId });
       throw new UnauthorizedException('Auth not configured');
     }
-    this.logger.log({ msg: 'Firebase app configured', correlationId });
 
     let decoded: admin.auth.DecodedIdToken;
     try {
@@ -119,27 +117,12 @@ export class AuthService {
 
     // Cambiar estatus a ACTIVE al hacer login (solo INACTIVE -> ACTIVE)
     if (user.estatus === 'INACTIVE') {
-      // Do not block authentication on DB write; fire-and-forget
-      this.prisma.user
-        .update({ where: { id: user.id }, data: { estatus: 'ACTIVE' } })
-        .then(() =>
-          this.logger.log({
-            msg: 'User status changed to ACTIVE',
-            uid: decoded.uid,
-            correlationId,
-          }),
-        )
-        .catch((e) =>
-          this.logger.warn({ msg: 'Failed to set ACTIVE status', error: e?.message || e, uid: decoded.uid, correlationId }),
-        );
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: { estatus: 'ACTIVE' },
+      });
     }
 
-    this.logger.log({
-      msg: 'User authenticated',
-      uid: decoded.uid,
-      role: user.role,
-      correlationId,
-    });
 
     return {
       id: user.id,

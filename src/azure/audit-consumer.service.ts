@@ -65,11 +65,6 @@ export class AuditConsumerService implements OnModuleInit, OnModuleDestroy {
             error: args.error.message,
           }),
       });
-      this.logger.log({
-        msg: 'AuditConsumer initialized',
-        topic: this.topicName,
-        subscription: this.subscriptionName,
-      });
     } catch (err) {
       this.logger.error({
         msg: 'Failed to initialize Service Bus consumer',
@@ -116,11 +111,6 @@ export class AuditConsumerService implements OnModuleInit, OnModuleDestroy {
     try {
       const entry = await this.historyService.saveChange(change);
       this.historyService.emitHistory(entry, event.simId);
-      this.logger.log({
-        msg: 'Audit event saved',
-        eventId: event.eventId,
-        simId: event.simId,
-      });
     } catch (err) {
       this.logger.error({
         msg: 'Failed to persist audit event',
