@@ -57,12 +57,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         client.disconnect();
         return;
       }
-      // Cambiar estatus a ACTIVE al conectar
+      // Cambiar estatus a ACTIVE al conectar (no bloquear handshake)
       if (user.estatus !== 'ACTIVE') {
-        await this.prisma.user.update({
-          where: { id: user.id },
-          data: { estatus: 'ACTIVE' },
-        });
+        this.prisma.user
+          .update({ where: { id: user.id }, data: { estatus: 'ACTIVE' } })
+          .catch((e) => this.logger.warn(`Failed to set ACTIVE status: ${e?.message || e}`));
       }
 
       client.data.userId = user.id;
@@ -82,10 +81,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
           where: { id: client.data.userId },
         });
         if (user && user.estatus !== 'BLOCKED') {
-          await this.prisma.user.update({
-            where: { id: client.data.userId },
-            data: { estatus: 'INACTIVE' },
-          });
+          // Fire-and-forget: don't block disconnect processing on DB
+          this.prisma.user
+            .update({ where: { id: client.data.userId }, data: { estatus: 'INACTIVE' } })
+            .catch((e) => this.logger.warn(`Failed to set INACTIVE status: ${e?.message || e}`));
         }
       } catch (err) {
         this.logger.warn(`Disconnect error: ${err?.message || 'unknown'}`);

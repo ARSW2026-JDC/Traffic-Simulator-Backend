@@ -119,15 +119,19 @@ export class AuthService {
 
     // Cambiar estatus a ACTIVE al hacer login (solo INACTIVE -> ACTIVE)
     if (user.estatus === 'INACTIVE') {
-      user = await this.prisma.user.update({
-        where: { id: user.id },
-        data: { estatus: 'ACTIVE' },
-      });
-      this.logger.log({
-        msg: 'User status changed to ACTIVE',
-        uid: decoded.uid,
-        correlationId,
-      });
+      // Do not block authentication on DB write; fire-and-forget
+      this.prisma.user
+        .update({ where: { id: user.id }, data: { estatus: 'ACTIVE' } })
+        .then(() =>
+          this.logger.log({
+            msg: 'User status changed to ACTIVE',
+            uid: decoded.uid,
+            correlationId,
+          }),
+        )
+        .catch((e) =>
+          this.logger.warn({ msg: 'Failed to set ACTIVE status', error: e?.message || e, uid: decoded.uid, correlationId }),
+        );
     }
 
     this.logger.log({

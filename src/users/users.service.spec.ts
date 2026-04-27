@@ -30,6 +30,7 @@ describe('UsersService', () => {
     redisMock = {
       get: jest.fn(),
       set: jest.fn(),
+      del: jest.fn().mockResolvedValue(undefined),
     };
 
     const module: TestingModule = await Test.createTestingModule({
