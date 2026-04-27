@@ -36,6 +36,7 @@ export class AuthService {
               email: decoded.email || `${decoded.uid}@anon.com`,
               name: decoded.name || `Guest${usersGuestCount + 1}`,
               role: 'GUEST',
+              avatarUrl: decoded.picture || null,
             },
           });
         } else {
@@ -44,11 +45,21 @@ export class AuthService {
               firebaseUid: decoded.uid,
               email: decoded.email ? decoded.email : `${decoded.uid}@anon.com`,
               name: decoded.name || null,
+              avatarUrl: decoded.picture || null,
             },
           });
         }
       } catch (err) {
         console.error('Error creating user:', err);
+      }
+    } else if (decoded.picture && user.avatarUrl !== decoded.picture) {
+      try {
+        user = await this.prisma.user.update({
+          where: { id: user.id },
+          data: { avatarUrl: decoded.picture },
+        });
+      } catch (err) {
+        console.error('Error updating user avatar:', err);
       }
     }
 
@@ -60,6 +71,7 @@ export class AuthService {
       id: user.id,
       email: user.email,
       name: user.name,
+      avatarUrl: user.avatarUrl,
       role: user.role,
       createdAt: user.createdAt.toISOString(),
     };

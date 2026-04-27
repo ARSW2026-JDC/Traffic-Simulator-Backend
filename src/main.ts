@@ -14,7 +14,7 @@ async function bootstrap() {
   app.use(responseTime());
 
   // Prefijo global para todas las rutas
-  app.setGlobalPrefix('api');
+  // app.setGlobalPrefix('api');
 
   // Swagger setup
   const config = new DocumentBuilder()

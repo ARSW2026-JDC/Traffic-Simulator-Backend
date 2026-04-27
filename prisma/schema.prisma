@@ -12,6 +12,7 @@ model User {
   firebaseUid String        @unique
   email       String        @unique
   name        String?
+  avatarUrl   String?
   role        Role          @default(USER)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -43,12 +44,15 @@ model ChatMessage {
 
 model ChangeLog {
   id         String   @id @default(cuid())
+  eventId    String?  @unique
   userId     String
   user       User     @relation(fields: [userId], references: [id])
+  simId      String
   entityType String
   entityId   String
   field      String
-  oldValue   String
-  newValue   String
+  message    String
   timestamp  DateTime @default(now())
+
+  @@index([simId, timestamp])
 }

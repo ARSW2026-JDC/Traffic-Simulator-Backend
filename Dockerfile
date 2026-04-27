@@ -10,7 +10,7 @@ COPY package*.json ./
 COPY prisma ./prisma
 
 # Instalar TODAS las dependencias (incluidas dev)
-RUN npm ci
+RUN npm install
 
 # Copiar el resto del código
 COPY . .
@@ -44,7 +44,7 @@ COPY package*.json ./
 COPY prisma ./prisma
 
 # Instalar solo dependencias necesarias para producción (sin ejecutar postinstall de Chromium)
-RUN npm ci --omit=dev --ignore-scripts && \
+RUN npm install --omit=dev --ignore-scripts && \
     node node_modules/prisma/build/index.js generate
 
 # Copiar build generado en el stage anterior
