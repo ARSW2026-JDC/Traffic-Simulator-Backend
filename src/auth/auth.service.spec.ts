@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { describe, it, expect, jest, beforeEach} from '@jest/globals';
 
 const mockFirebaseAuth = {
   verifyIdToken: jest.fn(),

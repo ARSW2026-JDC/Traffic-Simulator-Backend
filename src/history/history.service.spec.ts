@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HistoryService } from './history.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { describe, it, expect, jest, beforeEach, afterEach} from '@jest/globals';
 
 describe('HistoryService', () => {
   let service: HistoryService;

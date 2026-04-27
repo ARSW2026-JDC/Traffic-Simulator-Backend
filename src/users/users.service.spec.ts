@@ -3,6 +3,7 @@ import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { Role, Estatus } from '@prisma/client';
+import { describe, it, expect, jest, beforeEach, afterEach} from '@jest/globals';
 
 describe('UsersService', () => {
   let service: UsersService;

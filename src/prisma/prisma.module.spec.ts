@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaModule } from './prisma.module';
 import { PrismaService } from './prisma.service';
+import { describe, it, expect, jest, beforeEach, afterEach} from '@jest/globals';
 
 jest.mock('./prisma.service');
 

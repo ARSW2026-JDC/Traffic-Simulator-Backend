@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ChatService } from './chat.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { describe, it, expect, jest, beforeEach, afterEach} from '@jest/globals';
 
 describe('ChatService', () => {
   let service: ChatService;
