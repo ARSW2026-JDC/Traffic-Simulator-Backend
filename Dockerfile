@@ -12,6 +12,9 @@ COPY prisma ./prisma
 # Instalar TODAS las dependencias (incluidas dev)
 RUN npm install
 
+# Generar Prisma Client antes del build
+RUN npx prisma generate
+
 # Copiar el resto del código
 COPY . .
 
