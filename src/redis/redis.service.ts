@@ -1,4 +1,3 @@
-
 import { Injectable, OnModuleDestroy } from '@nestjs/common';
 import Redis from 'ioredis';
 import { envs } from '../config/envs';
@@ -12,7 +11,6 @@ export class RedisService implements OnModuleDestroy {
     this.client = new Redis(url);
   }
 
-  
   /**
    * Obtiene un valor del caché por clave
    */

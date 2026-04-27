@@ -7,6 +7,7 @@ import {
   ConnectedSocket,
   MessageBody,
 } from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import * as admin from 'firebase-admin';
 import { ChatService } from './chat.service';
@@ -17,6 +18,8 @@ import { getFirebaseAdmin } from '../auth/firebase-admin.provider';
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
+
+  private readonly logger = new Logger(ChatGateway.name);
 
   constructor(
     private readonly chatService: ChatService,
@@ -41,29 +44,31 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       const decoded = await admin.auth(firebaseApp).verifyIdToken(token);
-      let user = await this.prisma.user.findUnique({ where: { firebaseUid: decoded.uid } });
+      const user = await this.prisma.user.findUnique({
+        where: { firebaseUid: decoded.uid },
+      });
       if (!user) {
         client.disconnect();
         return;
       }
 
-      // Si el usuario está baneado o bloqueado, no permitir conexión
-      if (user.estatus === 'BANNED' || user.estatus === 'BLOCKED') {
+      // Solo BLOCKED impide conexión
+      if (user.estatus === 'BLOCKED') {
         client.disconnect();
         return;
       }
-      // Cambiar estatus a ACTIVE al conectar solo si no está bloqueado
+      // Cambiar estatus a ACTIVE al conectar (no bloquear handshake)
       if (user.estatus !== 'ACTIVE') {
-        await this.prisma.user.update({
-          where: { id: user.id },
-          data: { estatus: 'ACTIVE' },
-        });
+        this.prisma.user
+          .update({ where: { id: user.id }, data: { estatus: 'ACTIVE' } })
+          .catch((e) => this.logger.warn(`Failed to set ACTIVE status: ${e?.message || e}`));
       }
 
       client.data.userId = user.id;
       client.data.userName = user.name || user.email;
       client.data.role = user.role;
-    } catch {
+    } catch (err) {
+      this.logger.error(`Connection error: ${err?.message || 'unknown'}`);
       client.disconnect();
     }
   }
@@ -72,15 +77,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // Cambiar estatus a INACTIVE al desconectar solo si no está bloqueado
     if (client.data?.userId) {
       try {
-        const user = await this.prisma.user.findUnique({ where: { id: client.data.userId } });
+        const user = await this.prisma.user.findUnique({
+          where: { id: client.data.userId },
+        });
         if (user && user.estatus !== 'BLOCKED') {
-          await this.prisma.user.update({
-            where: { id: client.data.userId },
-            data: { estatus: 'INACTIVE' },
-          });
+          // Fire-and-forget: don't block disconnect processing on DB
+          this.prisma.user
+            .update({ where: { id: client.data.userId }, data: { estatus: 'INACTIVE' } })
+            .catch((e) => this.logger.warn(`Failed to set INACTIVE status: ${e?.message || e}`));
         }
-      } catch (e) {
-        // Ignorar errores de desconexión
+      } catch (err) {
+        this.logger.warn(`Disconnect error: ${err?.message || 'unknown'}`);
       }
     }
   }
@@ -88,10 +95,24 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('message:send')
   async handleMessage(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { content: string },
+    @MessageBody() data: { content: string; clientId?: string },
   ) {
     if (!client.data.userId || !data?.content?.trim()) return;
-    const msg = await this.chatService.saveMessage(client.data.userId, data.content.trim());
-    this.server.emit('message:new', msg);
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: client.data.userId },
+      select: { role: true },
+    });
+
+    if (user?.role === 'GUEST') {
+      client.emit('error', { message: 'Los usuarios invitados no pueden escribir en el chat' });
+      return;
+    }
+
+    const msg = await this.chatService.saveMessage(
+      client.data.userId,
+      data.content.trim(),
+    );
+    this.server.emit('message:new', { ...msg, clientId: data.clientId });
   }
 }
