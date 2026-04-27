@@ -18,12 +18,13 @@ interface EnvVars {
 
   GATEWAY_URL: string;
   REDIS_URL: string;
+  ALLOWED_ORIGINS?: string;
   AZURE_SERVICE_BUS_CONNECTION_STRING: string;
   AZURE_SERVICE_BUS_TOPIC: string;
   AZURE_SERVICE_BUS_SUBSCRIPTION: string;
 }
 const envsSchema = joi
-.object({
+  .object({
     PORT: joi.number().required(),
     DATABASE_URL: joi.string().required(),
     FIREBASE_PROJECT_ID: joi.string().required(),
@@ -37,6 +38,7 @@ const envsSchema = joi
     VITE_FIREBASE_APP_ID: joi.string().required(),
     GATEWAY_URL: joi.string().required(),
     REDIS_URL: joi.string().required(),
+    ALLOWED_ORIGINS: joi.string().optional(),
     AZURE_SERVICE_BUS_CONNECTION_STRING: joi.string().required(),
     AZURE_SERVICE_BUS_TOPIC: joi.string().required(),
     AZURE_SERVICE_BUS_SUBSCRIPTION: joi.string().required(),
@@ -62,6 +64,7 @@ export const envs = {
   firebaseMessagingSenderId: envVars.VITE_FIREBASE_MESSAGING_SENDER_ID,
   firebaseAppId: envVars.VITE_FIREBASE_APP_ID,
   redisUrl: envVars.REDIS_URL,
+  allowedOrigins: envVars.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'],
   azureServiceBusConnectionString: envVars.AZURE_SERVICE_BUS_CONNECTION_STRING,
   azureServiceBusTopic: envVars.AZURE_SERVICE_BUS_TOPIC,
   azureServiceBusSubscription: envVars.AZURE_SERVICE_BUS_SUBSCRIPTION,

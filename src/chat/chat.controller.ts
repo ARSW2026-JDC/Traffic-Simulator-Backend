@@ -5,6 +5,7 @@ import { Roles } from 'src/users/roles.decorator';
 import { RolesGuard } from 'src/users/roles.guard';
 import { Role } from '@prisma/client';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { PaginationQueryDto } from '../shared/dto';
 
 @ApiTags('chat')
 @Controller('chat')
@@ -17,10 +18,8 @@ export class ChatController {
   @Roles(Role.ADMIN, Role.USER)
   @ApiOperation({ summary: 'Obtener mensajes de chat' })
   @ApiBearerAuth()
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'cursor', required: false })
   @ApiResponse({ status: 200, description: 'Lista de mensajes' })
-  getMessages(@Query('limit') limit: string, @Query('cursor') cursor?: string) {
-    return this.chatService.getMessages(parseInt(limit || '50', 10), cursor);
+  getMessages(@Query() query: PaginationQueryDto) {
+    return this.chatService.getMessages(parseInt(query.limit || '50', 10), query.cursor);
   }
 }
