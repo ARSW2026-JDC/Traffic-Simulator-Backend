@@ -45,27 +45,67 @@ const envsSchema = joi
   })
   .unknown(true);
 
-const result = envsSchema.validate(process.env);
-if (result.error) {
-  throw new Error(`Config validation error: ${result.error.message}`);
+let envVarsCache: EnvVars | null = null;
+
+function getEnvVars(): EnvVars {
+  if (envVarsCache) return envVarsCache;
+  const result = envsSchema.validate(process.env);
+  if (result.error) {
+    throw new Error(`Config validation error: ${result.error.message}`);
+  }
+  envVarsCache = result.value as EnvVars;
+  return envVarsCache;
 }
-const envVars = result.value as EnvVars;
 
 export const envs = {
-  port: envVars.PORT,
-  databaseurl: envVars.DATABASE_URL,
-  firebaseProjectId: envVars.FIREBASE_PROJECT_ID,
-  firebaseClientEmail: envVars.FIREBASE_CLIENT_EMAIL,
-  firebasePrivateKey: envVars.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-  firebaseApiKey: envVars.VITE_FIREBASE_API_KEY,
-  firebaseAuthDomain: envVars.VITE_FIREBASE_AUTH_DOMAIN,
-  firebaseProjectIdFrontend: envVars.VITE_FIREBASE_PROJECT_ID,
-  firebaseStorageBucket: envVars.VITE_FIREBASE_STORAGE_BUCKET,
-  firebaseMessagingSenderId: envVars.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  firebaseAppId: envVars.VITE_FIREBASE_APP_ID,
-  redisUrl: envVars.REDIS_URL,
-  allowedOrigins: envVars.ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173'],
-  azureServiceBusConnectionString: envVars.AZURE_SERVICE_BUS_CONNECTION_STRING,
-  azureServiceBusTopic: envVars.AZURE_SERVICE_BUS_TOPIC,
-  azureServiceBusSubscription: envVars.AZURE_SERVICE_BUS_SUBSCRIPTION,
+  get port() {
+    return getEnvVars().PORT;
+  },
+  get databaseurl() {
+    return getEnvVars().DATABASE_URL;
+  },
+  get firebaseProjectId() {
+    return getEnvVars().FIREBASE_PROJECT_ID;
+  },
+  get firebaseClientEmail() {
+    return getEnvVars().FIREBASE_CLIENT_EMAIL;
+  },
+  get firebasePrivateKey() {
+    return getEnvVars().FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
+  },
+  get firebaseApiKey() {
+    return getEnvVars().VITE_FIREBASE_API_KEY;
+  },
+  get firebaseAuthDomain() {
+    return getEnvVars().VITE_FIREBASE_AUTH_DOMAIN;
+  },
+  get firebaseProjectIdFrontend() {
+    return getEnvVars().VITE_FIREBASE_PROJECT_ID;
+  },
+  get firebaseStorageBucket() {
+    return getEnvVars().VITE_FIREBASE_STORAGE_BUCKET;
+  },
+  get firebaseMessagingSenderId() {
+    return getEnvVars().VITE_FIREBASE_MESSAGING_SENDER_ID;
+  },
+  get firebaseAppId() {
+    return getEnvVars().VITE_FIREBASE_APP_ID;
+  },
+  get redisUrl() {
+    return getEnvVars().REDIS_URL;
+  },
+  get allowedOrigins() {
+    return (
+      getEnvVars().ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173']
+    );
+  },
+  get azureServiceBusConnectionString() {
+    return getEnvVars().AZURE_SERVICE_BUS_CONNECTION_STRING;
+  },
+  get azureServiceBusTopic() {
+    return getEnvVars().AZURE_SERVICE_BUS_TOPIC;
+  },
+  get azureServiceBusSubscription() {
+    return getEnvVars().AZURE_SERVICE_BUS_SUBSCRIPTION;
+  },
 };

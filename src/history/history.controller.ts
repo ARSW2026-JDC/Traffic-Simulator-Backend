@@ -1,7 +1,12 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { HistoryService } from './history.service';
 import { AuthGuard } from '../auth/auth.guard';
-import { ApiTags, ApiOperation, ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiResponse,
+} from '@nestjs/swagger';
 import { SimIdQueryDto } from '../shared/dto';
 
 @ApiTags('history')

@@ -1,7 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ChatService } from './chat.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { describe, it, expect, jest, beforeEach, afterEach} from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  jest,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
 
 describe('ChatService', () => {
   let service: ChatService;
@@ -51,7 +58,9 @@ describe('ChatService', () => {
     ];
 
     it('should return messages in reverse order (oldest first)', async () => {
-      prismaMock.chatMessage.findMany.mockResolvedValue([...mockMessages].reverse());
+      prismaMock.chatMessage.findMany.mockResolvedValue(
+        [...mockMessages].reverse(),
+      );
 
       const result = await service.getMessages();
 

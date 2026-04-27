@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { describe, it, expect, jest, beforeEach} from '@jest/globals';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 
 const mockFirebaseAuth = {
   verifyIdToken: jest.fn(),
@@ -58,11 +58,16 @@ describe('AuthService', () => {
       const { getFirebaseAdmin } = require('./firebase-admin.provider');
       (getFirebaseAdmin as jest.Mock).mockReturnValue(null);
 
-      await expect(service.verifyAndGetProfile('token')).rejects.toThrow(UnauthorizedException);
+      await expect(service.verifyAndGetProfile('token')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should return user when exists', async () => {
-      mockFirebaseAuth.verifyIdToken.mockResolvedValue({ uid: 'uid-1', provider_id: 'password' });
+      mockFirebaseAuth.verifyIdToken.mockResolvedValue({
+        uid: 'uid-1',
+        provider_id: 'password',
+      });
       prismaMock.user.findUnique.mockResolvedValue(mockUser);
 
       const result = await service.verifyAndGetProfile('valid-token');
@@ -72,10 +77,18 @@ describe('AuthService', () => {
     });
 
     it('should create new user when not exists', async () => {
-      mockFirebaseAuth.verifyIdToken.mockResolvedValue({ uid: 'new-uid', email: 'new@test.com', provider_id: 'password' });
+      mockFirebaseAuth.verifyIdToken.mockResolvedValue({
+        uid: 'new-uid',
+        email: 'new@test.com',
+        provider_id: 'password',
+      });
       prismaMock.user.findUnique.mockResolvedValue(null);
       prismaMock.user.count.mockResolvedValue(0);
-      prismaMock.user.create.mockResolvedValue({ ...mockUser, id: 'new-id', email: 'new@test.com' });
+      prismaMock.user.create.mockResolvedValue({
+        ...mockUser,
+        id: 'new-id',
+        email: 'new@test.com',
+      });
 
       const result = await service.verifyAndGetProfile('token');
 
@@ -84,18 +97,31 @@ describe('AuthService', () => {
     });
 
     it('should throw when guest limit reached', async () => {
-      mockFirebaseAuth.verifyIdToken.mockResolvedValue({ uid: 'guest', provider_id: 'anonymous' });
+      mockFirebaseAuth.verifyIdToken.mockResolvedValue({
+        uid: 'guest',
+        provider_id: 'anonymous',
+      });
       prismaMock.user.findUnique.mockResolvedValue(null);
       prismaMock.user.count.mockResolvedValue(50);
 
-      await expect(service.verifyAndGetProfile('token')).rejects.toThrow('Guest user limit reached');
+      await expect(service.verifyAndGetProfile('token')).rejects.toThrow(
+        'Guest user limit reached',
+      );
     });
 
     it('should throw when user blocked', async () => {
-      mockFirebaseAuth.verifyIdToken.mockResolvedValue({ uid: 'uid-1', provider_id: 'password' });
-      prismaMock.user.findUnique.mockResolvedValue({ ...mockUser, estatus: 'BLOCKED' });
+      mockFirebaseAuth.verifyIdToken.mockResolvedValue({
+        uid: 'uid-1',
+        provider_id: 'password',
+      });
+      prismaMock.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        estatus: 'BLOCKED',
+      });
 
-      await expect(service.verifyAndGetProfile('token')).rejects.toThrow('User is blocked');
+      await expect(service.verifyAndGetProfile('token')).rejects.toThrow(
+        'User is blocked',
+      );
     });
   });
 });

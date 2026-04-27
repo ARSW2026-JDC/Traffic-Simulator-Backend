@@ -1,32 +1,31 @@
-
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
-
 export class HistoryService {
   private wsServer: Server | null = null;
 
-  constructor(
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   setWsServer(server: Server) {
     this.wsServer = server;
   }
 
-  emitHistory(entry: {
-    id: string;
-    userId: string;
-    userName: string;
-    entityType: string;
-    entityId: string;
-    field: string;
-    oldValue: string;
-    newValue: string;
-    timestamp: number;
-  }, simId: string) {
+  emitHistory(
+    entry: {
+      id: string;
+      userId: string;
+      userName: string;
+      entityType: string;
+      entityId: string;
+      field: string;
+      oldValue: string;
+      newValue: string;
+      timestamp: number;
+    },
+    simId: string,
+  ) {
     if (!this.wsServer) return;
     this.wsServer.to(`sim:${simId}`).emit('history:new', entry);
   }

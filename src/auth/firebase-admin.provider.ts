@@ -13,7 +13,9 @@ export function getFirebaseAdmin(): admin.app.App | null {
     return null;
   }
   app = admin.initializeApp(
-    { credential: admin.credential.cert({ projectId, clientEmail, privateKey }) },
+    {
+      credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
+    },
     'backend',
   );
   return app;

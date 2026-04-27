@@ -6,9 +6,11 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { Pool } from 'pg';
 import { envs } from 'src/config/envs';
 
-
 @Injectable()
-export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+export class PrismaService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   constructor() {
     // En Prisma 7, usamos un adapter específico para PostgreSQL
     const connectionString = envs.databaseurl;

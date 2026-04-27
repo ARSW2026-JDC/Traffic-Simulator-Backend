@@ -1,17 +1,26 @@
 import * as joi from 'joi';
-import { describe, it, expect, jest, beforeEach, afterEach} from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  jest,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
 
 //Pruebas unitarias para validar que todas las variables de entorno requeridas existan; previene errores en producción.
 
 describe('Environment Configuration', () => {
-
   const envsSchema = joi
     .object({
       PORT: joi.number().required(),
       DATABASE_URL: joi.string().required(),
       DIRECT_URL: joi.string().required(),
       JWT_SECRET: joi.string().required(),
-      JWT_EXPIRATION: joi.alternatives().try(joi.string(), joi.number()).required(),
+      JWT_EXPIRATION: joi
+        .alternatives()
+        .try(joi.string(), joi.number())
+        .required(),
       GOOGLE_CLIENT_ID: joi.string().required(),
       GOOGLE_CLIENT_SECRET: joi.string().required(),
       GOOGLE_CALLBACK_URL: joi.string().required(),
@@ -269,11 +278,14 @@ describe('Environment Configuration', () => {
     it('should validate with realistic production values', () => {
       const env = {
         PORT: 8080,
-        DATABASE_URL: 'postgresql://admin:secure_password@db.example.com:5432/production_db',
-        DIRECT_URL: 'postgresql://admin:secure_password@db.example.com:5432/production_db',
+        DATABASE_URL:
+          'postgresql://admin:secure_password@db.example.com:5432/production_db',
+        DIRECT_URL:
+          'postgresql://admin:secure_password@db.example.com:5432/production_db',
         JWT_SECRET: 'very-long-and-secure-secret-key-for-production',
         JWT_EXPIRATION: '7d',
-        GOOGLE_CLIENT_ID: '1234567890-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com',
+        GOOGLE_CLIENT_ID:
+          '1234567890-abcdefghijklmnopqrstuvwxyz.apps.googleusercontent.com',
         GOOGLE_CLIENT_SECRET: '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3456',
         GOOGLE_CALLBACK_URL: 'https://api.example.com/auth/google/callback',
       };

@@ -1,7 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HistoryService } from './history.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { describe, it, expect, jest, beforeEach, afterEach} from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  jest,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
 
 describe('HistoryService', () => {
   let service: HistoryService;
@@ -271,7 +278,10 @@ describe('HistoryService', () => {
       );
 
       expect(mockServer.to).toHaveBeenCalledWith('sim:sim-1');
-      expect(mockServer.emit).toHaveBeenCalledWith('history:new', expect.any(Object));
+      expect(mockServer.emit).toHaveBeenCalledWith(
+        'history:new',
+        expect.any(Object),
+      );
     });
 
     it('should not emit when wsServer is null', () => {

@@ -1,5 +1,14 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
-import { ServiceBusClient, ServiceBusReceivedMessage, ServiceBusReceiver } from '@azure/service-bus';
+import {
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+} from '@nestjs/common';
+import {
+  ServiceBusClient,
+  ServiceBusReceivedMessage,
+  ServiceBusReceiver,
+} from '@azure/service-bus';
 import { HistoryService } from '../history/history.service';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -22,9 +31,12 @@ export class AuditConsumerService implements OnModuleInit, OnModuleDestroy {
   private client: ServiceBusClient | null = null;
   private receiver: ServiceBusReceiver | null = null;
 
-  private readonly connectionString = process.env.AZURE_SERVICE_BUS_CONNECTION_STRING;
-  private readonly topicName = process.env.AZURE_SERVICE_BUS_TOPIC || 'simulation-audit';
-  private readonly subscriptionName = process.env.AZURE_SERVICE_BUS_SUBSCRIPTION || 'audit-consumer';
+  private readonly connectionString =
+    process.env.AZURE_SERVICE_BUS_CONNECTION_STRING;
+  private readonly topicName =
+    process.env.AZURE_SERVICE_BUS_TOPIC || 'simulation-audit';
+  private readonly subscriptionName =
+    process.env.AZURE_SERVICE_BUS_SUBSCRIPTION || 'audit-consumer';
 
   constructor(
     private readonly historyService: HistoryService,
@@ -33,20 +45,36 @@ export class AuditConsumerService implements OnModuleInit, OnModuleDestroy {
 
   async onModuleInit() {
     if (!this.connectionString) {
-      this.logger.warn('Azure Service Bus not configured. History consumer disabled.');
+      this.logger.warn(
+        'Azure Service Bus not configured. History consumer disabled.',
+      );
       return;
     }
 
     try {
       this.client = new ServiceBusClient(this.connectionString);
-      this.receiver = this.client.createReceiver(this.topicName, this.subscriptionName);
+      this.receiver = this.client.createReceiver(
+        this.topicName,
+        this.subscriptionName,
+      );
       this.receiver.subscribe({
         processMessage: async (message) => this.handleMessage(message),
-        processError: async (args) => this.logger.warn({ msg: 'Service Bus error', error: args.error.message }),
+        processError: async (args) =>
+          this.logger.warn({
+            msg: 'Service Bus error',
+            error: args.error.message,
+          }),
       });
-      this.logger.log({ msg: 'AuditConsumer initialized', topic: this.topicName, subscription: this.subscriptionName });
+      this.logger.log({
+        msg: 'AuditConsumer initialized',
+        topic: this.topicName,
+        subscription: this.subscriptionName,
+      });
     } catch (err) {
-      this.logger.error({ msg: 'Failed to initialize Service Bus consumer', error: err.message });
+      this.logger.error({
+        msg: 'Failed to initialize Service Bus consumer',
+        error: err.message,
+      });
       this.client = null;
       this.receiver = null;
     }
@@ -66,29 +94,48 @@ export class AuditConsumerService implements OnModuleInit, OnModuleDestroy {
     }
 
     if (!event.actor?.uid || !event.actor?.name) {
-      this.logger.warn({ msg: 'Audit event missing actor', eventId: event.eventId, correlationId });
+      this.logger.warn({
+        msg: 'Audit event missing actor',
+        eventId: event.eventId,
+        correlationId,
+      });
       return;
     }
 
     await this.ensureUser(event);
     const change = this.mapAuditEvent(event);
     if (!change) {
-      this.logger.warn({ msg: 'Failed to map audit event', eventId: event.eventId, commandType: event.commandType });
+      this.logger.warn({
+        msg: 'Failed to map audit event',
+        eventId: event.eventId,
+        commandType: event.commandType,
+      });
       return;
     }
 
     try {
       const entry = await this.historyService.saveChange(change);
       this.historyService.emitHistory(entry, event.simId);
-      this.logger.log({ msg: 'Audit event saved', eventId: event.eventId, simId: event.simId });
+      this.logger.log({
+        msg: 'Audit event saved',
+        eventId: event.eventId,
+        simId: event.simId,
+      });
     } catch (err) {
-      this.logger.error({ msg: 'Failed to persist audit event', eventId: event.eventId, error: err.message });
+      this.logger.error({
+        msg: 'Failed to persist audit event',
+        eventId: event.eventId,
+        error: err.message,
+      });
     }
   }
 
   private parseEvent(message: ServiceBusReceivedMessage): AuditEvent | null {
     try {
-      const payload = typeof message.body === 'string' ? message.body : JSON.stringify(message.body ?? {});
+      const payload =
+        typeof message.body === 'string'
+          ? message.body
+          : JSON.stringify(message.body ?? {});
       const parsed = JSON.parse(payload) as AuditEvent;
       if (!parsed?.eventId || !parsed?.simId) return null;
       return parsed;
@@ -115,7 +162,8 @@ export class AuditConsumerService implements OnModuleInit, OnModuleDestroy {
   }
 
   private mapAuditEvent(event: AuditEvent) {
-    const { entityType, entityId, field, oldValue, newValue } = this.extractChange(event);
+    const { entityType, entityId, field, oldValue, newValue } =
+      this.extractChange(event);
     if (!entityType || !entityId || !field) return null;
     return {
       userId: event.actor.uid,
@@ -135,31 +183,80 @@ export class AuditConsumerService implements OnModuleInit, OnModuleDestroy {
         const speed = this.toNumber(event.payload.speed);
         const color = this.toString(event.payload.color);
         if (speed !== null) {
-          return { entityType: 'vehicle', entityId: vehicleId, field: 'speed', oldValue: '', newValue: speed.toString() };
+          return {
+            entityType: 'vehicle',
+            entityId: vehicleId,
+            field: 'speed',
+            oldValue: '',
+            newValue: speed.toString(),
+          };
         }
         if (color) {
-          return { entityType: 'vehicle', entityId: vehicleId, field: 'color', oldValue: '', newValue: color };
+          return {
+            entityType: 'vehicle',
+            entityId: vehicleId,
+            field: 'color',
+            oldValue: '',
+            newValue: color,
+          };
         }
-        return { entityType: 'vehicle', entityId: vehicleId, field: 'profile', oldValue: '', newValue: this.toString(event.payload.profile) };
+        return {
+          entityType: 'vehicle',
+          entityId: vehicleId,
+          field: 'profile',
+          oldValue: '',
+          newValue: this.toString(event.payload.profile),
+        };
       }
       case 'remove_vehicle': {
         const vehicleId = String(event.payload.vehicleId ?? '');
-        return { entityType: 'vehicle', entityId: vehicleId, field: 'deleted', oldValue: '', newValue: '' };
+        return {
+          entityType: 'vehicle',
+          entityId: vehicleId,
+          field: 'deleted',
+          oldValue: '',
+          newValue: '',
+        };
       }
       case 'add_vehicle':
       case 'add_vehicles': {
-        const count = this.toNumber(event.payload.count ?? event.payload.cantidad) ?? 1;
-        return { entityType: 'vehicle', entityId: 'batch', field: 'created', oldValue: '', newValue: count.toString() };
+        const count =
+          this.toNumber(event.payload.count ?? event.payload.cantidad) ?? 1;
+        return {
+          entityType: 'vehicle',
+          entityId: 'batch',
+          field: 'created',
+          oldValue: '',
+          newValue: count.toString(),
+        };
       }
       case 'remove_trafficLight': {
         const nodeId = this.toString(event.payload.nodeId);
-        return { entityType: 'trafficLight', entityId: nodeId, field: 'deleted', oldValue: '', newValue: '' };
+        return {
+          entityType: 'trafficLight',
+          entityId: nodeId,
+          field: 'deleted',
+          oldValue: '',
+          newValue: '',
+        };
       }
       case 'add_traffic_light': {
-        return { entityType: 'trafficLight', entityId: 'new', field: 'created', oldValue: '', newValue: '' };
+        return {
+          entityType: 'trafficLight',
+          entityId: 'new',
+          field: 'created',
+          oldValue: '',
+          newValue: '',
+        };
       }
       default:
-        return { entityType: 'simulation', entityId: event.simId, field: event.commandType, oldValue: '', newValue: '' };
+        return {
+          entityType: 'simulation',
+          entityId: event.simId,
+          field: event.commandType,
+          oldValue: '',
+          newValue: '',
+        };
     }
   }
 
@@ -174,7 +271,8 @@ export class AuditConsumerService implements OnModuleInit, OnModuleDestroy {
 
   private toString(value: unknown) {
     if (typeof value === 'string') return value;
-    if (typeof value === 'number' && Number.isFinite(value)) return value.toString();
+    if (typeof value === 'number' && Number.isFinite(value))
+      return value.toString();
     return '';
   }
 }

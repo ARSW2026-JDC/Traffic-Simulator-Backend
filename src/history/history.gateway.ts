@@ -42,7 +42,9 @@ export class HistoryGateway
         return;
       }
       const decoded = await admin.auth(firebaseApp).verifyIdToken(token);
-      const simId = (client.handshake.query?.simId as string) || (client.handshake.auth?.simId as string);
+      const simId =
+        (client.handshake.query?.simId as string) ||
+        (client.handshake.auth?.simId as string);
       if (simId) {
         client.join(`sim:${simId}`);
       } else {

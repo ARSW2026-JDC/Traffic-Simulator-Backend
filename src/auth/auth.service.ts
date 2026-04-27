@@ -21,13 +21,23 @@ export class AuthService {
     let decoded: admin.auth.DecodedIdToken;
     try {
       decoded = await admin.auth(firebaseApp).verifyIdToken(token);
-      this.logger.log({ msg: 'Token verified successfully', uid: decoded.uid, correlationId });
+      this.logger.log({
+        msg: 'Token verified successfully',
+        uid: decoded.uid,
+        correlationId,
+      });
     } catch (err) {
-      this.logger.warn({ msg: 'Invalid token', error: err.message, correlationId });
+      this.logger.warn({
+        msg: 'Invalid token',
+        error: err.message,
+        correlationId,
+      });
       throw new UnauthorizedException('Invalid token');
     }
 
-    let user = await this.prisma.user.findUnique({ where: { firebaseUid: decoded.uid } });
+    let user = await this.prisma.user.findUnique({
+      where: { firebaseUid: decoded.uid },
+    });
     if (!user) {
       user = await this.prisma.user.create({
         data: {
@@ -37,20 +47,33 @@ export class AuthService {
           avatarUrl: decoded.picture || null,
         },
       });
-      this.logger.log({ msg: 'User created', uid: decoded.uid, email: decoded.email, correlationId });
+      this.logger.log({
+        msg: 'User created',
+        uid: decoded.uid,
+        email: decoded.email,
+        correlationId,
+      });
     } else {
       if (decoded.picture && user.avatarUrl !== decoded.picture) {
         user = await this.prisma.user.update({
           where: { id: user.id },
           data: { avatarUrl: decoded.picture },
         });
-        this.logger.log({ msg: 'User avatar updated', uid: decoded.uid, correlationId });
+        this.logger.log({
+          msg: 'User avatar updated',
+          uid: decoded.uid,
+          correlationId,
+        });
       }
     }
 
     // Solo bloquear login para BLOCKED
     if (user.estatus === 'BLOCKED') {
-      this.logger.warn({ msg: 'Blocked user attempted login', uid: decoded.uid, correlationId });
+      this.logger.warn({
+        msg: 'Blocked user attempted login',
+        uid: decoded.uid,
+        correlationId,
+      });
       throw new UnauthorizedException('User is blocked');
     }
 
@@ -60,10 +83,19 @@ export class AuthService {
         where: { id: user.id },
         data: { estatus: 'ACTIVE' },
       });
-      this.logger.log({ msg: 'User status changed to ACTIVE', uid: decoded.uid, correlationId });
+      this.logger.log({
+        msg: 'User status changed to ACTIVE',
+        uid: decoded.uid,
+        correlationId,
+      });
     }
 
-    this.logger.log({ msg: 'User authenticated', uid: decoded.uid, role: user.role, correlationId });
+    this.logger.log({
+      msg: 'User authenticated',
+      uid: decoded.uid,
+      role: user.role,
+      correlationId,
+    });
 
     return {
       id: user.id,

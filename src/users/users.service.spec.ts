@@ -3,7 +3,14 @@ import { UsersService } from './users.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { RedisService } from '../redis/redis.service';
 import { Role, Estatus } from '@prisma/client';
-import { describe, it, expect, jest, beforeEach, afterEach} from '@jest/globals';
+import {
+  describe,
+  it,
+  expect,
+  jest,
+  beforeEach,
+  afterEach,
+} from '@jest/globals';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -76,7 +83,13 @@ describe('UsersService', () => {
       const result = await service.findAll();
 
       expect(prismaMock.user.findMany).toHaveBeenCalledWith({
-        select: { id: true, email: true, name: true, role: true, createdAt: true },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true,
+        },
         orderBy: { createdAt: 'desc' },
       });
       expect(redisMock.set).toHaveBeenCalledWith(
@@ -127,7 +140,13 @@ describe('UsersService', () => {
 
       expect(prismaMock.user.findMany).toHaveBeenCalledWith({
         where: { estatus: 'ACTIVE' },
-        select: { id: true, email: true, name: true, role: true, createdAt: true },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true,
+        },
         orderBy: { createdAt: 'desc' },
       });
     });
@@ -144,12 +163,18 @@ describe('UsersService', () => {
       };
       prismaMock.user.update.mockResolvedValue(updatedUser);
 
-      const result = await service.updateRole('user-1', 'ADMIN' as Role);
+      const result = await service.updateRole('user-1', 'ADMIN');
 
       expect(prismaMock.user.update).toHaveBeenCalledWith({
         where: { id: 'user-1' },
         data: { role: 'ADMIN' },
-        select: { id: true, email: true, name: true, role: true, createdAt: true },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true,
+        },
       });
       expect(result.role).toBe('ADMIN');
     });
@@ -160,7 +185,7 @@ describe('UsersService', () => {
         role: 'GUEST' as Role,
       });
 
-      const result = await service.updateRole('user-1', 'GUEST' as Role);
+      const result = await service.updateRole('user-1', 'GUEST');
 
       expect(result.role).toBe('GUEST');
     });
@@ -178,12 +203,19 @@ describe('UsersService', () => {
       };
       prismaMock.user.update.mockResolvedValue(updatedUser);
 
-      const result = await service.changeEstatus('user-1', 'BLOCKED' as Estatus);
+      const result = await service.changeEstatus('user-1', 'BLOCKED');
 
       expect(prismaMock.user.update).toHaveBeenCalledWith({
         where: { id: 'user-1' },
         data: { estatus: 'BLOCKED' },
-        select: { id: true, email: true, name: true, role: true, createdAt: true, estatus: true },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true,
+          estatus: true,
+        },
       });
       expect(result.estatus).toBe('BLOCKED');
     });
@@ -204,7 +236,13 @@ describe('UsersService', () => {
 
       expect(prismaMock.user.delete).toHaveBeenCalledWith({
         where: { id: 'user-1' },
-        select: { id: true, email: true, name: true, role: true, createdAt: true },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true,
+        },
       });
       expect(result.id).toBe('user-1');
     });

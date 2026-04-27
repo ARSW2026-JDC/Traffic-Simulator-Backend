@@ -16,14 +16,19 @@ export class AuthGuard implements CanActivate {
     const req = context.switchToHttp().getRequest();
 
     const auth = req.headers.authorization as string;
-    if (!auth?.startsWith('Bearer ')) throw new UnauthorizedException('Missing token');
+    if (!auth?.startsWith('Bearer '))
+      throw new UnauthorizedException('Missing token');
 
     const firebaseApp = getFirebaseAdmin();
     if (!firebaseApp) throw new UnauthorizedException('Auth not configured');
 
     try {
-      const decoded = await admin.auth(firebaseApp).verifyIdToken(auth.split(' ')[1]);
-      const user = await this.prisma.user.findUnique({ where: { firebaseUid: decoded.uid } });
+      const decoded = await admin
+        .auth(firebaseApp)
+        .verifyIdToken(auth.split(' ')[1]);
+      const user = await this.prisma.user.findUnique({
+        where: { firebaseUid: decoded.uid },
+      });
       if (!user) {
         throw new UnauthorizedException('User not found');
       }

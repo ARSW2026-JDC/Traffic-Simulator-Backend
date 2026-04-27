@@ -41,7 +41,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       }
 
       const decoded = await admin.auth(firebaseApp).verifyIdToken(token);
-      let user = await this.prisma.user.findUnique({ where: { firebaseUid: decoded.uid } });
+      const user = await this.prisma.user.findUnique({
+        where: { firebaseUid: decoded.uid },
+      });
       if (!user) {
         client.disconnect();
         return;
@@ -72,7 +74,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // Cambiar estatus a INACTIVE al desconectar solo si no está bloqueado
     if (client.data?.userId) {
       try {
-        const user = await this.prisma.user.findUnique({ where: { id: client.data.userId } });
+        const user = await this.prisma.user.findUnique({
+          where: { id: client.data.userId },
+        });
         if (user && user.estatus !== 'BLOCKED') {
           await this.prisma.user.update({
             where: { id: client.data.userId },
@@ -92,7 +96,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     if (!client.data.userId || !data?.content?.trim()) return;
 
-    const msg = await this.chatService.saveMessage(client.data.userId, data.content.trim());
+    const msg = await this.chatService.saveMessage(
+      client.data.userId,
+      data.content.trim(),
+    );
     this.server.emit('message:new', { ...msg, clientId: data.clientId });
   }
 }

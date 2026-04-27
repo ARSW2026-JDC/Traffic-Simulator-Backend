@@ -40,7 +40,11 @@ export class HealthController {
       await this.prisma.$queryRaw`SELECT 1`;
       return { status: 'pass', latencyMs: Date.now() - start };
     } catch (err) {
-      return { status: 'fail', latencyMs: Date.now() - start, error: err.message };
+      return {
+        status: 'fail',
+        latencyMs: Date.now() - start,
+        error: err.message,
+      };
     }
   }
 
@@ -48,26 +52,43 @@ export class HealthController {
     const start = Date.now();
     try {
       const result = await this.redis.client.ping();
-      return { status: result === 'PONG' ? 'pass' : 'fail', latencyMs: Date.now() - start };
+      return {
+        status: result === 'PONG' ? 'pass' : 'fail',
+        latencyMs: Date.now() - start,
+      };
     } catch (err) {
-      return { status: 'fail', latencyMs: Date.now() - start, error: err.message };
+      return {
+        status: 'fail',
+        latencyMs: Date.now() - start,
+        error: err.message,
+      };
     }
   }
 
   private async checkServiceBus(): Promise<HealthCheck> {
     if (!envs.azureServiceBusConnectionString) {
-      return { status: 'fail', error: 'AZURE_SERVICE_BUS_CONNECTION_STRING not configured' };
+      return {
+        status: 'fail',
+        error: 'AZURE_SERVICE_BUS_CONNECTION_STRING not configured',
+      };
     }
 
     const start = Date.now();
     let client: ServiceBusClient | null = null;
     try {
       client = new ServiceBusClient(envs.azureServiceBusConnectionString);
-      const receiver = client.createReceiver(envs.azureServiceBusTopic, 'health-check-subscriber');
+      const receiver = client.createReceiver(
+        envs.azureServiceBusTopic,
+        'health-check-subscriber',
+      );
       await receiver.close();
       return { status: 'pass', latencyMs: Date.now() - start };
     } catch (err) {
-      return { status: 'fail', latencyMs: Date.now() - start, error: err.message };
+      return {
+        status: 'fail',
+        latencyMs: Date.now() - start,
+        error: err.message,
+      };
     } finally {
       if (client) {
         try {
