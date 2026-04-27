@@ -113,6 +113,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.data.userId,
       data.content.trim(),
     );
-    this.server.emit('message:new', { ...msg, clientId: data.clientId });
+    client.emit('message:new', { ...msg, clientId: data.clientId });
+    this.server.emit('message:new', { ...msg });
   }
 }
