@@ -31,6 +31,7 @@ export class AuthController {
     if (!authHeader?.startsWith('Bearer ')) {
       throw new UnauthorizedException('Missing token');
     }
+    // console.log('Verifying token:', authHeader);
     return this.authService.verifyAndGetProfile(authHeader.split(' ')[1]);
   }
 }

@@ -29,7 +29,7 @@ export class UsersService {
   }
 
   updateRole(id: string, role: Role) {
-    return this.prisma.user.update({
+    const p = this.prisma.user.update({
       where: { id },
       data: { role },
       select: {
@@ -40,10 +40,13 @@ export class UsersService {
         createdAt: true,
       },
     });
+    p.then(() => this.redis.del('users:all')).catch(() => undefined);
+    this.redis.del('users:active').catch(() => undefined);
+    return p;
   }
 
   deleteUser(id: string) {
-    return this.prisma.user.delete({
+    const p = this.prisma.user.delete({
       where: { id },
       select: {
         id: true,
@@ -53,6 +56,9 @@ export class UsersService {
         createdAt: true,
       },
     });
+    p.then(() => this.redis.del('users:all')).catch(() => undefined);
+    this.redis.del('users:active').catch(() => undefined);
+    return p;
   }
 
   async findAllActive() {
@@ -75,7 +81,7 @@ export class UsersService {
   }
 
   changeEstatus(id: string, estatus: Estatus) {
-    return this.prisma.user.update({
+    const p = this.prisma.user.update({
       where: { id },
       data: { estatus },
       select: {
@@ -87,5 +93,8 @@ export class UsersService {
         estatus: true,
       },
     });
+    p.then(() => this.redis.del('users:all')).catch(() => undefined);
+    this.redis.del('users:active').catch(() => undefined);
+    return p;
   }
 }
