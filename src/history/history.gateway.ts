@@ -2,9 +2,9 @@ import {
   WebSocketGateway,
   WebSocketServer,
   OnGatewayConnection,
-  OnGatewayDisconnect,
   OnGatewayInit,
 } from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import * as admin from 'firebase-admin';
 import { HistoryService } from './history.service';
@@ -12,11 +12,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import { getFirebaseAdmin } from '../auth/firebase-admin.provider';
 
 @WebSocketGateway({ namespace: '/history', cors: { origin: '*' } })
-export class HistoryGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+export class HistoryGateway implements OnGatewayInit, OnGatewayConnection {
   @WebSocketServer()
   server: Server;
+
+  private readonly logger = new Logger(HistoryGateway.name);
 
   constructor(
     private readonly historyService: HistoryService,
@@ -50,10 +50,9 @@ export class HistoryGateway
       } else {
         client.join(`user:${decoded.uid}`);
       }
-    } catch {
+    } catch (err) {
+      this.logger.error(`Connection error: ${err?.message || 'unknown'}`);
       client.disconnect();
     }
   }
-
-  handleDisconnect(_client: Socket) {}
 }

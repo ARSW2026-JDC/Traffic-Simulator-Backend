@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import * as joi from 'joi';
-import type { StringValue } from 'ms';
 
 interface EnvVars {
   PORT: number;

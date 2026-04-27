@@ -7,6 +7,7 @@ import {
   ConnectedSocket,
   MessageBody,
 } from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import * as admin from 'firebase-admin';
 import { ChatService } from './chat.service';
@@ -17,6 +18,8 @@ import { getFirebaseAdmin } from '../auth/firebase-admin.provider';
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
+
+  private readonly logger = new Logger(ChatGateway.name);
 
   constructor(
     private readonly chatService: ChatService,
@@ -65,7 +68,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.data.userId = user.id;
       client.data.userName = user.name || user.email;
       client.data.role = user.role;
-    } catch {
+    } catch (err) {
+      this.logger.error(`Connection error: ${err?.message || 'unknown'}`);
       client.disconnect();
     }
   }
@@ -83,8 +87,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             data: { estatus: 'INACTIVE' },
           });
         }
-      } catch (e) {
-        // Ignorar errores de desconexión
+      } catch (err) {
+        this.logger.warn(`Disconnect error: ${err?.message || 'unknown'}`);
       }
     }
   }
