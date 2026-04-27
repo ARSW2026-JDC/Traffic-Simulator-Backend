@@ -46,6 +46,7 @@ jobs:
         with:
           name: node-app
           path: .
+          include-hidden-files: true
 
   deploy:
     runs-on: ubuntu-latest
@@ -74,4 +75,4 @@ jobs:
           app-name: 'cuts-backend'
           slot-name: 'Production'
           package: .
-          startup-command: 'npm install --omit=dev && npx prisma generate && node dist/src/main.js'
+          startup-command: 'node dist/src/main.js'
