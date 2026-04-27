@@ -1,12 +1,10 @@
 import 'dotenv/config';
 import * as joi from 'joi';
-import type { StringValue } from 'ms';
 
 interface EnvVars {
   PORT: number;
   DATABASE_URL: string;
-  DIRECT_URL: string;
-  
+
   FIREBASE_PROJECT_ID: string;
   FIREBASE_CLIENT_EMAIL: string;
   FIREBASE_PRIVATE_KEY: string;
@@ -19,12 +17,15 @@ interface EnvVars {
 
   GATEWAY_URL: string;
   REDIS_URL: string;
+  ALLOWED_ORIGINS?: string;
+  AZURE_SERVICE_BUS_CONNECTION_STRING: string;
+  AZURE_SERVICE_BUS_TOPIC: string;
+  AZURE_SERVICE_BUS_SUBSCRIPTION: string;
 }
 const envsSchema = joi
   .object({
     PORT: joi.number().required(),
     DATABASE_URL: joi.string().required(),
-    DIRECT_URL: joi.string().required(),
     FIREBASE_PROJECT_ID: joi.string().required(),
     FIREBASE_CLIENT_EMAIL: joi.string().required(),
     FIREBASE_PRIVATE_KEY: joi.string().required(),
@@ -36,28 +37,74 @@ const envsSchema = joi
     VITE_FIREBASE_APP_ID: joi.string().required(),
     GATEWAY_URL: joi.string().required(),
     REDIS_URL: joi.string().required(),
+    ALLOWED_ORIGINS: joi.string().optional(),
+    AZURE_SERVICE_BUS_CONNECTION_STRING: joi.string().required(),
+    AZURE_SERVICE_BUS_TOPIC: joi.string().required(),
+    AZURE_SERVICE_BUS_SUBSCRIPTION: joi.string().required(),
   })
   .unknown(true);
 
-const result = envsSchema.validate(process.env);
-if (result.error) {
-  throw new Error(`Config validation error: ${result.error.message}`);
+let envVarsCache: EnvVars | null = null;
+
+function getEnvVars(): EnvVars {
+  if (envVarsCache) return envVarsCache;
+  const result = envsSchema.validate(process.env);
+  if (result.error) {
+    throw new Error(`Config validation error: ${result.error.message}`);
+  }
+  envVarsCache = result.value as EnvVars;
+  return envVarsCache;
 }
-const envVars = result.value as EnvVars;
 
 export const envs = {
-  port: envVars.PORT,
-  databaseurl: envVars.DATABASE_URL,
-  databasedirect: envVars.DIRECT_URL,
-  firebaseProjectId: envVars.FIREBASE_PROJECT_ID,
-  firebaseClientEmail: envVars.FIREBASE_CLIENT_EMAIL,
-  firebasePrivateKey: envVars.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-  firebaseApiKey: envVars.VITE_FIREBASE_API_KEY,
-  firebaseAuthDomain: envVars.VITE_FIREBASE_AUTH_DOMAIN,
-  firebaseProjectIdFrontend: envVars.VITE_FIREBASE_PROJECT_ID,
-  firebaseStorageBucket: envVars.VITE_FIREBASE_STORAGE_BUCKET,
-  firebaseMessagingSenderId: envVars.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  firebaseAppId: envVars.VITE_FIREBASE_APP_ID,
-  gatewayUrl: envVars.GATEWAY_URL.startsWith('http') ? envVars.GATEWAY_URL : `https://${envVars.GATEWAY_URL}`,
-  redisUrl: envVars.REDIS_URL,
+  get port() {
+    return getEnvVars().PORT;
+  },
+  get databaseurl() {
+    return getEnvVars().DATABASE_URL;
+  },
+  get firebaseProjectId() {
+    return getEnvVars().FIREBASE_PROJECT_ID;
+  },
+  get firebaseClientEmail() {
+    return getEnvVars().FIREBASE_CLIENT_EMAIL;
+  },
+  get firebasePrivateKey() {
+    return getEnvVars().FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n');
+  },
+  get firebaseApiKey() {
+    return getEnvVars().VITE_FIREBASE_API_KEY;
+  },
+  get firebaseAuthDomain() {
+    return getEnvVars().VITE_FIREBASE_AUTH_DOMAIN;
+  },
+  get firebaseProjectIdFrontend() {
+    return getEnvVars().VITE_FIREBASE_PROJECT_ID;
+  },
+  get firebaseStorageBucket() {
+    return getEnvVars().VITE_FIREBASE_STORAGE_BUCKET;
+  },
+  get firebaseMessagingSenderId() {
+    return getEnvVars().VITE_FIREBASE_MESSAGING_SENDER_ID;
+  },
+  get firebaseAppId() {
+    return getEnvVars().VITE_FIREBASE_APP_ID;
+  },
+  get redisUrl() {
+    return getEnvVars().REDIS_URL;
+  },
+  get allowedOrigins() {
+    return (
+      getEnvVars().ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173']
+    );
+  },
+  get azureServiceBusConnectionString() {
+    return getEnvVars().AZURE_SERVICE_BUS_CONNECTION_STRING;
+  },
+  get azureServiceBusTopic() {
+    return getEnvVars().AZURE_SERVICE_BUS_TOPIC;
+  },
+  get azureServiceBusSubscription() {
+    return getEnvVars().AZURE_SERVICE_BUS_SUBSCRIPTION;
+  },
 };

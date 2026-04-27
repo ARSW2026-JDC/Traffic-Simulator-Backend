@@ -12,35 +12,23 @@ import { PrismaService } from '../prisma/prisma.service';
 export class AuthGuard implements CanActivate {
   constructor(private readonly prisma: PrismaService) {}
 
-
-
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
 
-    const uid: string = req.headers['x-user-id'];
-    const email: string = req.headers['x-user-email'] || '';
-
-    if (uid) {
-      const user = await this.prisma.user.findUnique({ where: { firebaseUid: uid } });
-      if (!user) {
-        throw new UnauthorizedException('User not found');
-      }
-      if (user.estatus === 'BLOCKED') {
-        throw new UnauthorizedException('User is blocked');
-      }
-      req.user = user;
-      return true;
-    }
-
     const auth = req.headers.authorization as string;
-    if (!auth?.startsWith('Bearer ')) throw new UnauthorizedException('Missing token');
+    if (!auth?.startsWith('Bearer '))
+      throw new UnauthorizedException('Missing token');
 
     const firebaseApp = getFirebaseAdmin();
     if (!firebaseApp) throw new UnauthorizedException('Auth not configured');
 
     try {
-      const decoded = await admin.auth(firebaseApp).verifyIdToken(auth.split(' ')[1]);
-      const user = await this.prisma.user.findUnique({ where: { firebaseUid: decoded.uid } });
+      const decoded = await admin
+        .auth(firebaseApp)
+        .verifyIdToken(auth.split(' ')[1]);
+      const user = await this.prisma.user.findUnique({
+        where: { firebaseUid: decoded.uid },
+      });
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
@@ -53,5 +41,4 @@ export class AuthGuard implements CanActivate {
       throw new UnauthorizedException('Invalid token');
     }
   }
-
 }
