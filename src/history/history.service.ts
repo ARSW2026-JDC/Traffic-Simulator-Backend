@@ -2,7 +2,6 @@
 import { Injectable } from '@nestjs/common';
 import { Server } from 'socket.io';
 import { PrismaService } from '../prisma/prisma.service';
-import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 
@@ -11,11 +10,25 @@ export class HistoryService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly redis: RedisService,
   ) {}
 
   setWsServer(server: Server) {
     this.wsServer = server;
+  }
+
+  emitHistory(entry: {
+    id: string;
+    userId: string;
+    userName: string;
+    entityType: string;
+    entityId: string;
+    field: string;
+    oldValue: string;
+    newValue: string;
+    timestamp: number;
+  }, simId: string) {
+    if (!this.wsServer) return;
+    this.wsServer.to(`sim:${simId}`).emit('history:new', entry);
   }
 
   async saveChange(data: {
@@ -28,14 +41,14 @@ export class HistoryService {
     newValue: string;
   }) {
     const user = await this.prisma.user.findUnique({
-      where: { id: data.userId },
+      where: { firebaseUid: data.userId },
       select: { name: true, email: true },
     });
 
     const message = `${data.field}: ${data.oldValue} -> ${data.newValue}`;
     const entry = await this.prisma.changeLog.create({
       data: {
-        user: { connect: { id: data.userId } },
+        user: { connect: { firebaseUid: data.userId } },
         simId: data.simId,
         entityType: data.entityType,
         entityId: data.entityId,
@@ -57,10 +70,11 @@ export class HistoryService {
     };
   }
 
-  async getHistory(limit = 50, cursor?: string) {
+  async getHistory(limit = 50, cursor?: string, simId?: string) {
     const entries = await this.prisma.changeLog.findMany({
       take: limit,
       ...(cursor ? { skip: 1, cursor: { id: cursor } } : {}),
+      ...(simId ? { where: { simId } } : {}),
       orderBy: { timestamp: 'desc' },
       include: { user: { select: { name: true, email: true } } },
     });

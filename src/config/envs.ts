@@ -19,6 +19,9 @@ interface EnvVars {
 
   GATEWAY_URL: string;
   REDIS_URL: string;
+  AZURE_SERVICE_BUS_CONNECTION_STRING: string;
+  AZURE_SERVICE_BUS_TOPIC: string;
+  AZURE_SERVICE_BUS_SUBSCRIPTION: string;
 }
 const envsSchema = joi
   .object({
@@ -36,6 +39,9 @@ const envsSchema = joi
     VITE_FIREBASE_APP_ID: joi.string().required(),
     GATEWAY_URL: joi.string().required(),
     REDIS_URL: joi.string().required(),
+    AZURE_SERVICE_BUS_CONNECTION_STRING: joi.string().required(),
+    AZURE_SERVICE_BUS_TOPIC: joi.string().required(),
+    AZURE_SERVICE_BUS_SUBSCRIPTION: joi.string().required(),
   })
   .unknown(true);
 
@@ -60,4 +66,7 @@ export const envs = {
   firebaseAppId: envVars.VITE_FIREBASE_APP_ID,
   gatewayUrl: envVars.GATEWAY_URL.startsWith('http') ? envVars.GATEWAY_URL : `https://${envVars.GATEWAY_URL}`,
   redisUrl: envVars.REDIS_URL,
+  azureServiceBusConnectionString: envVars.AZURE_SERVICE_BUS_CONNECTION_STRING,
+  azureServiceBusTopic: envVars.AZURE_SERVICE_BUS_TOPIC,
+  azureServiceBusSubscription: envVars.AZURE_SERVICE_BUS_SUBSCRIPTION,
 };

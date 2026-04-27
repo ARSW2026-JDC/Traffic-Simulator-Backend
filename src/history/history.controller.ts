@@ -8,7 +8,11 @@ export class HistoryController {
   constructor(private readonly historyService: HistoryService) {}
 
   @Get()
-  getHistory(@Query('limit') limit: string, @Query('cursor') cursor?: string) {
-    return this.historyService.getHistory(parseInt(limit || '50', 10), cursor);
+  getHistory(
+    @Query('limit') limit: string,
+    @Query('cursor') cursor?: string,
+    @Query('simId') simId?: string,
+  ) {
+    return this.historyService.getHistory(parseInt(limit || '50', 10), cursor, simId);
   }
 }
