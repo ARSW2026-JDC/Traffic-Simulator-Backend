@@ -9,7 +9,6 @@ import {
   ApiOperation,
   ApiBearerAuth,
   ApiResponse,
-  ApiQuery,
 } from '@nestjs/swagger';
 import { PaginationQueryDto } from '../shared/dto';
 
@@ -26,9 +25,6 @@ export class ChatController {
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Lista de mensajes' })
   getMessages(@Query() query: PaginationQueryDto) {
-    return this.chatService.getMessages(
-      parseInt(query.limit || '50', 10),
-      query.cursor,
-    );
+    return this.chatService.getMessages(query.limit, query.cursor);
   }
 }

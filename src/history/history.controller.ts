@@ -21,7 +21,7 @@ export class HistoryController {
   @ApiResponse({ status: 200, description: 'Lista de cambios' })
   getHistory(@Query() query: SimIdQueryDto) {
     return this.historyService.getHistory(
-      parseInt(query.limit || '50', 10),
+      query.limit,
       query.cursor,
       query.simId,
     );
