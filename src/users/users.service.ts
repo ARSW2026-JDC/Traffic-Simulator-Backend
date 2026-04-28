@@ -21,6 +21,7 @@ export class UsersService {
         name: true,
         role: true,
         createdAt: true,
+        estatus: true,
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -38,6 +39,7 @@ export class UsersService {
         name: true,
         role: true,
         createdAt: true,
+        estatus: true,
       },
     });
     p.then(() => this.redis.del('users:all')).catch(() => undefined);

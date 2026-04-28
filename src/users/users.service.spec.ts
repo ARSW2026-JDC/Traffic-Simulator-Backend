@@ -90,6 +90,7 @@ describe('UsersService', () => {
           name: true,
           role: true,
           createdAt: true,
+          estatus: true,
         },
         orderBy: { createdAt: 'desc' },
       });
@@ -175,6 +176,7 @@ describe('UsersService', () => {
           name: true,
           role: true,
           createdAt: true,
+          estatus: true,
         },
       });
       expect(result.role).toBe('ADMIN');
