@@ -3,6 +3,7 @@ import { ChatGateway } from './chat.gateway';
 import { ChatService } from './chat.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { Server } from 'socket.io';
+import {describe,it,expect,jest,beforeEach} from '@jest/globals';
 
 describe('ChatGateway', () => {
   let gateway: ChatGateway;
