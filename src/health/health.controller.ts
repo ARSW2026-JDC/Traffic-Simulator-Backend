@@ -22,7 +22,6 @@ export class HealthController {
     const checks = {
       database: await this.checkDatabase(),
       redis: await this.checkRedis(),
-      serviceBus: await this.checkServiceBus(),
     };
 
     const allPass = Object.values(checks).every((c) => c.status === 'pass');
@@ -62,41 +61,6 @@ export class HealthController {
         latencyMs: Date.now() - start,
         error: err.message,
       };
-    }
-  }
-
-  private async checkServiceBus(): Promise<HealthCheck> {
-    if (!envs.azureServiceBusConnectionString) {
-      return {
-        status: 'fail',
-        error: 'AZURE_SERVICE_BUS_CONNECTION_STRING not configured',
-      };
-    }
-
-    const start = Date.now();
-    let client: ServiceBusClient | null = null;
-    try {
-      client = new ServiceBusClient(envs.azureServiceBusConnectionString);
-      const receiver = client.createReceiver(
-        envs.azureServiceBusTopic,
-        'health-check-subscriber',
-      );
-      await receiver.close();
-      return { status: 'pass', latencyMs: Date.now() - start };
-    } catch (err) {
-      return {
-        status: 'fail',
-        latencyMs: Date.now() - start,
-        error: err.message,
-      };
-    } finally {
-      if (client) {
-        try {
-          await client.close();
-        } catch {
-          // Ignore close errors
-        }
-      }
     }
   }
 }

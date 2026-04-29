@@ -18,9 +18,6 @@ interface EnvVars {
   GATEWAY_URL: string;
   REDIS_URL: string;
   ALLOWED_ORIGINS?: string;
-  AZURE_SERVICE_BUS_CONNECTION_STRING: string;
-  AZURE_SERVICE_BUS_TOPIC: string;
-  AZURE_SERVICE_BUS_SUBSCRIPTION: string;
 }
 const envsSchema = joi
   .object({
@@ -38,9 +35,6 @@ const envsSchema = joi
     GATEWAY_URL: joi.string().required(),
     REDIS_URL: joi.string().required(),
     ALLOWED_ORIGINS: joi.string().optional(),
-    AZURE_SERVICE_BUS_CONNECTION_STRING: joi.string().required(),
-    AZURE_SERVICE_BUS_TOPIC: joi.string().required(),
-    AZURE_SERVICE_BUS_SUBSCRIPTION: joi.string().required(),
   })
   .unknown(true);
 
@@ -97,14 +91,5 @@ export const envs = {
     return (
       getEnvVars().ALLOWED_ORIGINS?.split(',') || ['http://localhost:5173']
     );
-  },
-  get azureServiceBusConnectionString() {
-    return getEnvVars().AZURE_SERVICE_BUS_CONNECTION_STRING;
-  },
-  get azureServiceBusTopic() {
-    return getEnvVars().AZURE_SERVICE_BUS_TOPIC;
-  },
-  get azureServiceBusSubscription() {
-    return getEnvVars().AZURE_SERVICE_BUS_SUBSCRIPTION;
   },
 };
