@@ -5,7 +5,7 @@
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=ARSW2026-JDC_Traffic-Simulator-Backend&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=ARSW2026-JDC_Traffic-Simulator-Backend)
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=ARSW2026-JDC_Traffic-Simulator-Backend&metric=security_rating)](https://sonarcloud.io/dashboard?id=ARSW2026-JDC_Traffic-Simulator-Backend)
 
-Backend principal de la aplicación CUTS. Proporciona API REST para usuarios, autenticación Firebase, chat en tiempo real, gestión de historial y conexión a Redis.
+Backend principal de la aplicación CUTS. Proporciona API REST para gestión de usuarios, autenticación Firebase y conexión a Redis para cache y sesiones.
 
 ## Tecnologías
 
@@ -14,7 +14,6 @@ Backend principal de la aplicación CUTS. Proporciona API REST para usuarios, au
 - **[Prisma](https://www.prisma.io/)** v7.5.0 - ORM
 - **[PostgreSQL](https://www.postgresql.org/)** - Base de datos
 - **[Redis](https://redis.io/)** v5.3.2 - Cache y sesiones
-- **[Socket.io](https://socket.io/)** v4.6.1 - WebSocket
 - **[firebase-admin](https://firebase.google.com/docs/admin)** v12.0.0 - Autenticación
 - **[Joi](https://joi.dev/)** v18.0.2 - Validación de env vars
 
@@ -68,9 +67,8 @@ npm run test:cov       # Coverage
 ```
 src/
 ├── auth/           # Autenticación Firebase
-├── chat/          # Chat WebSocket
 ├── config/         # Variables de entorno
-├── history/       # Historial de mensajes
+├── health/         # Health checks
 ├── prisma/         # Cliente Prisma
 ├── redis/         # Cache Redis
 └── users/         # Gestión de usuarios
