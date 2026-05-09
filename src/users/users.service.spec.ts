@@ -25,6 +25,13 @@ describe('UsersService', () => {
         delete: jest.fn(),
         count: jest.fn(),
       },
+      chatMessage: {
+        deleteMany: jest.fn(),
+      },
+      changeLog: {
+        deleteMany: jest.fn(),
+      },
+      $transaction: jest.fn(),
     };
 
     redisMock = {
@@ -233,10 +240,20 @@ describe('UsersService', () => {
         role: 'USER' as Role,
         createdAt: new Date('2024-01-01'),
       };
+      prismaMock.chatMessage.deleteMany.mockResolvedValue({ count: 1 });
+      prismaMock.changeLog.deleteMany.mockResolvedValue({ count: 2 });
       prismaMock.user.delete.mockResolvedValue(deletedUser);
+      prismaMock.$transaction.mockImplementation(async (cb: any) => cb(prismaMock));
 
       const result = await service.deleteUser('user-1');
 
+      expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
+      expect(prismaMock.chatMessage.deleteMany).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+      });
+      expect(prismaMock.changeLog.deleteMany).toHaveBeenCalledWith({
+        where: { userId: 'user-1' },
+      });
       expect(prismaMock.user.delete).toHaveBeenCalledWith({
         where: { id: 'user-1' },
         select: {

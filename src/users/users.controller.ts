@@ -1,4 +1,14 @@
-import { Controller, Get, Patch, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Param,
+  Body,
+  UseGuards,
+  Delete,
+  Req,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Role, Estatus } from '@prisma/client';
 import { UsersService } from './users.service';
 import { AuthGuard } from '../auth/auth.guard';
@@ -52,5 +62,19 @@ export class UsersController {
   @ApiResponse({ status: 200, description: 'Estatus actualizado' })
   changeEstatus(@Param('id') id: string, @Body() body: EstatusDto) {
     return this.usersService.changeEstatus(id, body.estatus);
+  }
+
+  @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiOperation({ summary: 'Eliminar usuario' })
+  @ApiBearerAuth()
+  @ApiParam({ name: 'id', description: 'ID del usuario' })
+  @ApiResponse({ status: 200, description: 'Usuario eliminado' })
+  deleteUser(@Param('id') id: string, @Req() req: { user?: { id: string } }) {
+    if (req?.user?.id && req.user.id === id) {
+      throw new ForbiddenException('No puedes eliminar tu propio usuario');
+    }
+    return this.usersService.deleteUser(id);
   }
 }
