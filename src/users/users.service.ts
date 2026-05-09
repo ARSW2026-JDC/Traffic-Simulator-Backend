@@ -48,15 +48,19 @@ export class UsersService {
   }
 
   deleteUser(id: string) {
-    const p = this.prisma.user.delete({
-      where: { id },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        createdAt: true,
-      },
+    const p = this.prisma.$transaction(async (tx) => {
+      await tx.chatMessage.deleteMany({ where: { userId: id } });
+      await tx.changeLog.deleteMany({ where: { userId: id } });
+      return tx.user.delete({
+        where: { id },
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          role: true,
+          createdAt: true,
+        },
+      });
     });
     p.then(() => this.redis.del('users:all')).catch(() => undefined);
     this.redis.del('users:active').catch(() => undefined);
